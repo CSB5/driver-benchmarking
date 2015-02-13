@@ -1,0 +1,82 @@
+\documentclass[11pt]{article}
+\usepackage[latin1]{inputenc}
+%\usepackage{frbib}
+%\usepackage{natbib}
+\usepackage{geometry}
+\usepackage{epsfig}
+\usepackage{psfrag}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{color}
+\usepackage{grffile}
+\usepackage{pdflscape}
+
+\pagestyle{empty}
+\geometry{ hmargin=0.5cm, vmargin=0.5cm }
+\def\sizeSmall{6cm}
+\def\sizeS{12cm}
+\def\myRotation{0}
+
+\begin{document}
+
+\begin{landscape}
+
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=\sizeS, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0.pdf}\vspace{1cm}
+    \begin{tabular}{cc}
+      \textbf{RANK 5}&\textbf{RANK 10}\\
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_RANK_5.pdf}&
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_RANK_10.pdf}\\[0.5cm]
+      \textbf{RANK 20}&\textbf{RANK 50}\\
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_RANK_20.pdf}&
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_RANK_50.pdf}\\
+    \end{tabular}
+  \end{center}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=\sizeS, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0_CANCER.pdf}\vspace{1cm}
+    \begin{tabular}{cc}
+      \textbf{RANK 5}&\textbf{RANK 10}\\
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_RANK_5_CANCER.pdf}&
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_RANK_10_CANCER.pdf}\\[0.5cm]
+      \textbf{RANK 20}&\textbf{RANK 50}\\
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_RANK_20_CANCER.pdf}&
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_RANK_50_CANCER.pdf}\\
+    \end{tabular}
+  \end{center}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=\sizeS, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0.pdf}\vspace{1cm}
+    \begin{tabular}{cc}
+      \textbf{FREQ 0.01}&\textbf{FREQ 0.02}\\
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0.01.pdf} &
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0.02.pdf}\\[0.5cm]
+      \textbf{FREQ 0.05}&\textbf{FREQ 0.1}\\
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0.05.pdf}&
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0.1.pdf}\\
+    \end{tabular}
+  \end{center}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=\sizeS, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0_CANCER.pdf}\vspace{1cm}
+    \begin{tabular}{cc}
+      \textbf{FREQ 0.01}&\textbf{FREQ 0.02}\\
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0.01_CANCER.pdf} &
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0.02_CANCER.pdf}\\[0.5cm]
+      \textbf{FREQ 0.05}&\textbf{FREQ 0.1}\\
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0.05_CANCER.pdf}&
+      \includegraphics[width=\sizeSmall, angle=\myRotation]{pairwise_comparision_MUT_FREQ_0.1_CANCER.pdf}\\
+    \end{tabular}
+  \end{center}
+\end{figure}
+
+\end{landscape}
+
+\end{document}
