@@ -1,8 +1,14 @@
 #!/usr/bin/perl
 
-use warnings;
+#use warnings;
 use Config::Simple;
 use Getopt::Long;
+use POSIX 'strftime';
+use 5.010;
+
+my $version = "2.0.0";
+my $date = strftime '%Y%m%d', localtime;
+my $runID = "${version}_${date}";
 
 my ( $configFile, $flag_debug, $flag_help, %config, @queue, $command, $lastID );
 my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -v PATH,PERL5LIB,R_LIBS_SITE,MOSEKLM_LICENSE_FILE,AUGUSTUS_CONFIG_PATH,CLASSPATH";
@@ -22,7 +28,7 @@ Options:
 
 
 Version:
-	1.0
+	$version
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
@@ -52,7 +58,7 @@ print "done.\n";
 # Preparing output folders
 print "Preparing output folders. Please wait...";
 system("mkdir -p $config{'general.analysisDir'}") unless (-d $config{'general.analysisDir'});
-system("mkdir -p $config{'general.outDir'}") unless (-d $config{'general.outDir'});
+system("mkdir -p $config{'general.resultsDir'}") unless (-d $config{'general.resultsDir'});
 print "done.\n";
 
 # Initializing variables
@@ -78,7 +84,7 @@ if($config{'general.oncoIMPACT'}){
 	# Parse oncoIMPACT output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $config{'general.analysisDir'}/LOGS/oncoIMPACT_parseOutput.error.log -o $config{'general.analysisDir'}/LOGS/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'oncoIMPACT.scriptsDir'}/parse_to_standard_output.pl --in $config{'general.analysisDir'}/oncoIMPACT_analysis/GENE_LIST/ALTERATION.dat --out $config{'general.outDir'}/oncoIMPACT.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $config{'general.analysisDir'}/LOGS/oncoIMPACT_parseOutput.error.log -o $config{'general.analysisDir'}/LOGS/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'oncoIMPACT.scriptsDir'}/parse_to_standard_output.pl --in $config{'general.analysisDir'}/oncoIMPACT_analysis/GENE_LIST/ALTERATION.dat --out $config{'general.resultsDir'}/oncoIMPACT.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -98,7 +104,7 @@ if($config{'general.DriverNet'}){
 	# Parse DriverNet output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DriverNet_parseOutput -e $config{'general.analysisDir'}/LOGS/DriverNet_parseOutput.error.log -o $config{'general.analysisDir'}/LOGS/DriverNet_parseOutput.run.log -hold_jid $lastID $config{'DriverNet.scriptsDir'}/parse_to_standard_output.pl --in $config{'general.analysisDir'}/DRIVERNET/res_driver_net.dat --out $config{'general.outDir'}/DriverNet.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DriverNet_parseOutput -e $config{'general.analysisDir'}/LOGS/DriverNet_parseOutput.error.log -o $config{'general.analysisDir'}/LOGS/DriverNet_parseOutput.run.log -hold_jid $lastID $config{'DriverNet.scriptsDir'}/parse_to_standard_output.pl --in $config{'general.analysisDir'}/DRIVERNET/res_driver_net.dat --out $config{'general.resultsDir'}/DriverNet.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -130,7 +136,7 @@ if($config{'general.MutSigCV'}){
 	# Parse MutSigCV output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_parseOutput -e $config{'general.analysisDir'}/LOGS/MutSigCV_parseOutput.error.log -o $config{'general.analysisDir'}/LOGS/MutSigCV_parseOutput.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/parse_to_standard_output.pl --in $config{'general.analysisDir'}/MUTSIGCV/$config{'general.disease'}.sig_genes.txt --out $config{'general.outDir'}/MutSigCV.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_parseOutput -e $config{'general.analysisDir'}/LOGS/MutSigCV_parseOutput.error.log -o $config{'general.analysisDir'}/LOGS/MutSigCV_parseOutput.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/parse_to_standard_output.pl --in $config{'general.analysisDir'}/MUTSIGCV/$config{'general.disease'}.sig_genes.txt --out $config{'general.resultsDir'}/MutSigCV.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -148,3 +154,43 @@ sub submit {
 	push( @queue, $return );
 	print TRACE "\tJob $return submitted.\n";
 }    # end sub submit
+
+
+sub generateConfig {
+	my $software = "@_";
+	open(OUT, "> $config{'general.analysisDir'}/$runID/${software}_$runID.cfg");
+	
+	given($software){
+		when( 'oncoIMPACT'){
+			print OUT "outDir=$config{'general.analysisDir'}/$runID\n";
+			print OUT "scriptDir=$config{'oncoIMPACT.scriptsDir'}\n";
+			print OUT "numThreads=$config{'cluster.numThreads'}\n";
+			print OUT "cnv=$config{'oncoIMPACT.cnv'}\n";
+			print OUT "exp=$config{'oncoIMPACT.exp'}\n";
+			print OUT "snp=$config{'oncoIMPACT.snp'}\n";
+			continue;
+		}
+		when( 'DriverNet' ){
+			print OUT "dataDir=$config{'DriverNet.dataDir'}\n";
+			print OUT "outDir=$config{'general.analysisDir'}/$runID/$software\n";
+			print OUT "expData=$config{'DriverNet.expData'}\n";
+			print OUT "numProc=$config{'cluster.numThreads'}\n";
+			print OUT "scriptDir=$config{'DriverNet.tcgaDir'}\n";
+			continue;
+		}
+		when( 'MutSigCV' ){
+			print OUT "outDir=$config{'general.analysisDir'}/$runID/$software\n";
+			print OUT "matlab=$config{'MutSigCV.matlab'}\n";
+			print OUT "maf=$config{'MutSigCV.maf'}\n";
+			print OUT "coverage=$config{'MutSigCV.coverage'}\n";
+			print OUT "covariate=$config{'MutSigCV.covariate'}\n";
+			print OUT "dict=$config{'MutSigCV.dict'}\n";
+			print OUT "chr=$config{'MutSigCV.chr'}\n";
+			print OUT "prefix=$config{'MutSigCV.prefix'}\n";
+			continue;
+		}
+		default{
+			close(OUT);
+		}
+	}
+}
