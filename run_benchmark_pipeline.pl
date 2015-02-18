@@ -11,7 +11,7 @@ my $version = "2.0.0";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${version}_${date}";
 
-my ( $configFile, $flag_debug, $flag_help, %config, @queue, $command, $lastID, $software, $outDir );
+my ( $configFile, $flag_debug, $flag_help, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir );
 my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -v PATH,PERL5LIB,R_LIBS_SITE,MOSEKLM_LICENSE_FILE,AUGUSTUS_CONFIG_PATH,CLASSPATH";
 
 my $help_message = "
@@ -23,6 +23,7 @@ Usage:
 Options:
 	--config = path to config file *
 	--debug: prints trace to STDERR
+	--sim: simulation mode - only prints commands to be executed to TRACE log
 	--help : prints this message 
 	
 * indicates required parameters	
@@ -43,6 +44,7 @@ if ( @ARGV == 0 ) {
 GetOptions(
 	"config=s" => \$configFile,
 	"debug"    => \$flag_debug,
+	"sim"	   => \$flag_simulate,
 	"help"     => \$flag_help
 ) or die("Error in command line arguments.\n");
 
@@ -169,15 +171,18 @@ if($config{'general.$software'}){
 }
 
 
+close(TRACE);
 
 ### Sub-routines ###
 sub submit {
 	$command = "@_";
 	print TRACE "[Command] $command\n";
-	my $return = `$command`;
-	chomp($return);	
-	push( @queue, $return );
-	print TRACE "\tJob $return submitted.\n";
+	unless($flag_simulate){
+		my $return = `$command`;
+		chomp($return);	
+		push( @queue, $return );
+		print TRACE "\tJob $return submitted.\n";
+	}
 }    # end sub submit
 
 
