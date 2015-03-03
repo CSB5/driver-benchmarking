@@ -15,22 +15,43 @@ my %threshold_list =
 
 my %method_ID = ();
 my @ID_to_method = ();
+my %sample_list = ();
+
+#
+#To update using that file:
+#/mnt/pnsg10_projects/bertrandd/oncoimpact/MUTATION_BENCHMARK/TEST_DATA/COAD/gene_mutation_frequency.txt
+#
+
+my (%pan_cancer, %cancer_census);
+cancer_annotation();
 
 open(FILE, $data_gene_annotation_file);
 %data_gene_annotation = ();
 while(<FILE>){
+    chop $_;
     @line = split(/\t/, $_);
     $gene =  $line[0];
+    
+    #Gene annotation
     $mut_freq = $line[1];
 
-    $CC_status = $line[11];
-    $PC_status = $line[12];
-    
     $gene_status = "-";
-    $gene_status = "CANCER" if($CC_status eq "CC" || $PC_status eq "PC");
+    $gene_status = "CANCER" if(exists $pan_cancer{$gene} || exists $cancer_census{$gene});
 
-    my %gene_annot = ("MUT_FREQ", $mut_freq, "STATUS", $gene_status);
+    #Sample annotation
+    @sample_info_tmp = split(/\;/, $line[2]);
+    my @sample_info = ();
+    foreach $s_m (@sample_info_tmp){
+	@tmp = split(/\:/, $s_m);
+	$sample = $tmp[0];
+	$sample_list{$sample} = 1;
+	push(@sample_info, $sample);
+    }
+    
+    #Update the geneannotation
+    my %gene_annot = ("MUT_FREQ", $mut_freq, "STATUS", $gene_status, "SAMPLE", \@sample_info);
     $data_gene_annotation{$gene} = \%gene_annot;
+    
 }
 close(FILE);
 
@@ -80,12 +101,17 @@ for(my $i = 0; $i < @ID_to_method; $i++){
 #Write the pairwise comparison matrises
 my $inter;
 my $matrix_file;
+my %method_sample_driver = ();
 foreach $threshold_type (keys %threshold_list){
     foreach $threshold_val (@{$threshold_list{$threshold_type}}){
 	clear_matrix(\@matrix);
 	foreach $method_1 (@ID_to_method){
+	    #Init the mehtod_driver_sample structure
+	    my %map = ();
+	    $method_sample_driver{$method_1} = \%map;
+	    #
 	    foreach $method_2 (@ID_to_method){
-		next if($method_1 eq $method_2);
+		#next if($method_1 eq $method_2);
 		$inter = 0;
 		$list_size = 0;
 		#print STDERR $threshold_type."\t".$threshold_val."\t".$method_1."\t".$method_2."\t".$gene."\n";#<STDIN>;
@@ -98,13 +124,27 @@ foreach $threshold_type (keys %threshold_list){
 		    #The must pass the threshold for method_1
 		    #print $threshold_type."\t".$threshold_val."\t".$method_1."\t".$method_2."\t".$gene."\n";#<STDIN>;
 		    if(test_threshold($threshold_type, $threshold_val, $gene, $method_1)){
-			$list_size++;
-			$method_result{$method_1}->{$gene}->{"USE"} = 1;
 			
-			#print STDERR $threshold_type."\t".$threshold_val."\t".$method_1."\t".$method_2."\t".$gene."\n";#<STDIN>;
-			if(exists $method_result{$method_2}->{$gene} && test_threshold($threshold_type, $threshold_val, $gene, $method_2)){
-			    $inter++;
-			    $method_result{$method_1}->{$gene}->{"FREQ_CALL"}++;
+			#Single method analysis
+			if($method_1 eq $method_2){
+			    $sample_list = $data_gene_annotation{$gene}->{"SAMPLE"};
+			    foreach $sample (@{$sample_list}){
+				if(! exists $method_sample_driver{$method_1}->{$sample}){
+				    $method_sample_driver{$method_1}->{$sample} = 0;
+				}
+				$method_sample_driver{$method_1}->{$sample}++;
+			    }
+			}
+			#Pairwise comparisions
+			else{
+			    $list_size++;
+			    $method_result{$method_1}->{$gene}->{"USE"} = 1;
+			    
+			    #print STDERR $threshold_type."\t".$threshold_val."\t".$method_1."\t".$method_2."\t".$gene."\n";#<STDIN>;
+			    if(exists $method_result{$method_2}->{$gene} && test_threshold($threshold_type, $threshold_val, $gene, $method_2)){
+				$inter++;
+				$method_result{$method_1}->{$gene}->{"FREQ_CALL"}++;
+			    }
 			}
 		    }
 		}
@@ -112,18 +152,76 @@ foreach $threshold_type (keys %threshold_list){
 	    }
 	}
 	
-	#For the barplot file
-	$matrix_file = write_barplot_file($threshold_type, $threshold_val, $gene_status_selection);
-	plot_barplot($matrix_file, "$threshold_type\_$threshold_val", @ID_to_method+0, 1);
-	plot_barplot($matrix_file, "$threshold_type\_$threshold_val", @ID_to_method+0, 0);
+	#For sample driver coverage boxplot files
+	$boxplot_file = write_boxplot_file($threshold_type, $threshold_val, $gene_status_selection);
+	plot_boxplot($boxplot_file, "$threshold_type\_$threshold_val");
+
+	#For the barplot pairwise comparision files
+	#$matrix_file = write_barplot_file($threshold_type, $threshold_val, $gene_status_selection);
+	#plot_barplot($matrix_file, "$threshold_type\_$threshold_val", @ID_to_method+0, 1);
+	#plot_barplot($matrix_file, "$threshold_type\_$threshold_val", @ID_to_method+0, 0);
 	
-	####For the HEAT map file
+	####For the HEAT map pairwise comparision files
 	#Write the file
 	#$matrix_file = write_heat_map_file(\@matrix, $threshold_type, $threshold_val, $gene_status_selection);
 	#plot_heat_map($matrix_file, "$threshold_type\_$threshold_val");
 
     }
 }
+
+sub write_boxplot_file{
+     my ($threshold_type, $threshold_val, $gene_status_selection) = @_;
+     my $boxplot_file = "$out_dir/sample_cov_$threshold_type\_$threshold_val";
+     if($gene_status_selection ne ""){
+	$boxplot_file .= "\_$gene_status_selection";
+    }
+     
+     open(OUT, ">$boxplot_file.dat");
+
+     #The header
+     print OUT "".(join("\t", @ID_to_method))."\n";
+     
+     foreach $sample (keys %sample_list){
+	 print OUT $sample;
+	 for(my $i = 0; $i < @ID_to_method; $i++){
+	     $method = $ID_to_method[$i];
+	     $res = 0;
+	     if(exists $method_sample_driver{$method}->{$sample}){
+		 $res = $method_sample_driver{$method}->{$sample};
+	     }
+	     print OUT "\t".$res;
+	 }
+	 print OUT "\n";
+     }
+     
+     close(OUT);
+
+     return $boxplot_file;
+
+}
+
+sub plot_boxplot{
+    my ($matrix_file, $title) = @_;
+    
+    my $font_size = 3;
+    my $note_font_size = 8;
+    my $margin_size = 30; 
+
+    open(OUT, ">$matrix_file.R");
+    print OUT "pdf(file=\"$matrix_file.pdf\",
+	paper=\"special\",
+	width=10,
+	height=10
+	)\n";
+    print OUT "profile <- read.table(\"$matrix_file.dat\", header = TRUE)\n";
+
+    print OUT "palette <- rainbow(ncol(profile))\n";
+    print OUT "boxplot.matrix(as.matrix(profile), col=palette, cex.axis=$font_size)\n";
+
+    close(OUT);
+    run_exe("R --vanilla < $matrix_file.R");
+}
+
 
 #Plot the barplot
 sub write_barplot_file{
@@ -298,6 +396,30 @@ col=palette, cexRow=$font_size, cexCol=$font_size,
     run_exe("mv  $matrix_file\_temp.pdf $matrix_file.pdf");
 
 }
+
+sub cancer_annotation{
+    #cancer gene census
+    my $cancer_gene_census_file = "/mnt/pnsg10_projects/bertrandd/oncoimpact/SCRIPT/oncoIMPACT/cancer_gene_census.csv";
+    open(FILE, $cancer_gene_census_file);
+    while(<FILE>){
+	@line = split(/\s+/, $_);    
+	#chomp($line[0]);
+	$cancer_census{$line[0]} = 1;
+    }
+    close(FILE);
+
+#pan cancer data
+    my $pan_cancer_file = "/mnt/pnsg10_projects/bertrandd/oncoimpact/SCRIPT/oncoIMPACT/pancancer_driver_list.csv";
+    open(FILE, $pan_cancer_file);
+    while(<FILE>){
+	chop($_);
+	@line = split(/\t/, $_);
+	#chomp($line[0]);
+	$pan_cancer{$line[0]} = 1 if($line[7] eq "High_Confidence_Driver");
+    }
+    close(FILE);
+}
+
 
 sub clear_matrix{
     my ($mat) = @_;
