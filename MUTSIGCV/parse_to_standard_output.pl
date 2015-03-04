@@ -6,13 +6,13 @@ use Getopt::Long;
 my ($file_in, $file_out, $flag_debug, $flag_help);
 
 my $help_message = "
-This script parses DriverNet's output to a standard output.
+This script parses MutSigCV's output to a standard output.
 
 Usage:
 	parse_to_standard_output.pl [OPTIONS]
 
 Options:
-	--in = path to DriverNet results file *
+	--in = path to MutSigCV results file *
 	--out = path to output file *
 	--debug: prints trace to STDERR
 	--help : prints this message 

@@ -12,7 +12,7 @@ Usage:
 	parse_to_standard_output.pl [OPTIONS]
 
 Options:
-	--in = path to DriverNet results file *
+	--in = path to oncoIMPACT results file *
 	--out = path to output file *
 	--debug: prints trace to STDERR
 	--help : prints this message 
