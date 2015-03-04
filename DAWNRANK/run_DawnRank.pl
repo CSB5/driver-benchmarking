@@ -65,7 +65,7 @@ print "done.\n";
 
 # filter and sort expression and mutation matrices
 print "Filtering and sorting expression and mutation matrices. Please wait...";
-$command = "$config{'default.scriptsDir'}/construct_adj_matrix.pl --exp $config{'default.exp'} --mut $config{'default.mut'} --adj $config{'default.adj'} --out $config{'default.outDir'}";
+$command = "$config{'default.scriptsDir'}/filter_and_update_matrices.pl --exp $config{'default.exp'} --mut $config{'default.mut'} --adj $config{'default.adj'} --out $config{'default.outDir'}";
 $command = $command . " --debug" if $flag_debug;
 print STDERR "[command] $command\n" if $flag_debug;
 system($command);

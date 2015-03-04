@@ -33,7 +33,7 @@ if ( @ARGV == 0 ) {
 }
 
 GetOptions(
-	"edge=s"      	=> \$edge_list_file,
+	"adj=s"      	=> \$edge_list_file,
 	"out=s"         => \$out_file,
 	"debug"         => \$flag_debug,
 	"help"          => \$flag_help
