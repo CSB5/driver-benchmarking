@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "2.0.2";
+my $version = "2.0.3";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${version}_${date}";
 
@@ -87,7 +87,7 @@ if($config{'general.oncoIMPACT'}){
 	
 	
 	# Run oncoIMPACT
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'oncoIMPACT.numThreads'} -N $config{'general.disease'}_oncoIMPACT -e $logsDir/oncoIMPACT.error.log -o $logsDir/oncoIMPACT.run.log $config{'oncoIMPACT.scriptsDir'}/oncoIMPACT.pl $analysisDir/oncoIMPACT_$runID.cfg $config{'oncoIMPACT.subSample'}";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_oncoIMPACT -e $logsDir/oncoIMPACT.error.log -o $logsDir/oncoIMPACT.run.log $config{'oncoIMPACT.scriptsDir'}/oncoIMPACT.pl $analysisDir/oncoIMPACT_$runID.cfg $config{'oncoIMPACT.subSample'}";
 	$command = $command . " 1" if ($flag_debug);
 	submit($command);
 	
@@ -114,7 +114,7 @@ if($config{'general.DriverNet'}){
 	generateConfig("DriverNet");
 	
 	# Run DriverNet
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'DriverNet.numThreads'} -N $config{'general.disease'}_DriverNet -e $logsDir/DriverNet.error.log -o $logsDir/DriverNet.run.log $config{'DriverNet.scriptsDir'}/run_driver_net.pl --config $analysisDir/DriverNet_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_DriverNet -e $logsDir/DriverNet.error.log -o $logsDir/DriverNet.run.log $config{'DriverNet.scriptsDir'}/run_driver_net.pl --config $analysisDir/DriverNet_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -168,6 +168,33 @@ if($config{'general.MutSigCV'}){
 }
 
 
+# DawnRank
+if($config{'general.DawnRank'}){
+	print "Running DawnRank. Please wait...";
+	
+	# Initialise folder
+	$outDir = "$analysisDir/DAWNRANK";
+	system("mkdir -p $outDir") unless (-d $outDir);
+	
+	# Generate config file
+	generateConfig("DawnRank");
+	
+	# Run DriverNet
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_DawnRank -e $logsDir/DawnRank.error.log -o $logsDir/DawnRank.run.log $config{'DawnRank.scriptsDir'}/run_DawnRank.pl --config $analysisDir/DawnRank_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+#	# Parse DriverNet output to standard format
+#	$lastID = $queue[-1];
+#	chomp($lastID);
+#	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'DawnRank.scriptsDir'}/parse_to_standard_output.pl --in $outDir/res_driver_net.dat --out $resultsDir/DawnRank.result";
+#	$command = $command . " --debug" if ($flag_debug);
+#	submit($command);
+	
+	print "Job submitted.\n";
+}
+
+
 close(TRACE);
 
 ### Sub-routines ###
@@ -203,7 +230,7 @@ sub generateConfig {
 			print OUT "outDir=$analysisDir/$software\n";
 			print OUT "expData=$config{'DriverNet.expData'}\n";
 			print OUT "numProc=$config{'cluster.numThreads'}\n";
-			print OUT "scriptDir=$config{'DriverNet.tcgaDir'}\n";
+			print OUT "scriptsDir=$config{'DriverNet.tcgaDir'}\n";
 			continue;
 		}
 		when( 'MutSigCV' ){
@@ -215,6 +242,14 @@ sub generateConfig {
 			print OUT "dict=$config{'MutSigCV.dict'}\n";
 			print OUT "chr=$config{'MutSigCV.chr'}\n";
 			print OUT "prefix=$config{'MutSigCV.prefix'}\n";
+			continue;
+		}
+		when( 'DawnRank' ){
+			print OUT "adj=$config{'DawnRank.adj'}\n";
+			print OUT "exp=$config{'DawnRank.exp'}\n";
+			print OUT "mut=$config{'DawnRank.mut'}\n";
+			print OUT "outDir=$analysisDir/$software\n";
+			print OUT "scriptsDir=$config{'DawnRank.scriptsDir'}\n";
 			continue;
 		}
 		default{
