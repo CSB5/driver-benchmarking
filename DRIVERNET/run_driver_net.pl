@@ -56,8 +56,8 @@ system("mkdir -p $driver_net_dir") unless (-d $driver_net_dir);
 	
 #Construct the driver net data mutation data
 $driver_net_mut_matrix = "$driver_net_dir/patMutMatrix.txt";
-print STDERR "$config{'default.scriptDir'}/produce_mut_matrix_driver_net.pl $config{'default.dataDir'} $driver_net_mut_matrix $config{'default.scriptDir'}\n" if $flag_debug;
-system("$config{'default.scriptDir'}/produce_mut_matrix_driver_net.pl $config{'default.dataDir'} $driver_net_mut_matrix $config{'default.scriptDir'}");
+print STDERR "$config{'default.scriptsDir'}/produce_mut_matrix_driver_net.pl $config{'default.dataDir'} $driver_net_mut_matrix $config{'default.scriptsDir'}\n" if $flag_debug;
+system("$config{'default.scriptsDir'}/produce_mut_matrix_driver_net.pl $config{'default.dataDir'} $driver_net_mut_matrix $config{'default.scriptsDir'}");
 	
 open (OUT_cmd, ">$driver_net_dir/cmd.txt");
 	
@@ -68,7 +68,7 @@ for($i = 0; $i < $config{'default.numProc'}; $i++){
     print OUT "library(DriverNet)\n";
     print OUT "data(sampleGeneNames)\n";
     print OUT "my_patMut <- read.table(\"$driver_net_mut_matrix\", header=T)\n";
-    print OUT "load(\"$config{'default.scriptDir'}/influenceGraph.rda\")\n";
+    print OUT "load(\"$config{'default.scriptsDir'}/influenceGraph.rda\")\n";
 
     #Data given in the paper
     if(index($config{'default.expData'}, ".rda") != -1){
@@ -112,7 +112,7 @@ open(OUT, ">$file");
 print OUT "library(DriverNet)\n";
 print OUT "data(sampleGeneNames)\n";
 print OUT "my_patMut <- read.table(\"$driver_net_mut_matrix\", header=T)\n";
-print OUT "load(\"$config{'default.scriptDir'}/influenceGraph.rda\")\n";
+print OUT "load(\"$config{'default.scriptsDir'}/influenceGraph.rda\")\n";
 #
 #Data given in the paper
 if(index($config{'default.expData'}, ".rda") != -1){
