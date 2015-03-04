@@ -3,7 +3,7 @@
 use warnings;
 use Getopt::Long;
 
-my ($file_in, $file_out, $flag_help, $flag_debug) = @ARGV;
+my ($file_in, $file_out, $flag_help, $flag_debug);
 
 my $help_message = "
 This script parses DawnRank's output to a standard output.
