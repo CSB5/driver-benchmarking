@@ -184,12 +184,12 @@ if($config{'general.DawnRank'}){
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
-#	# Parse DriverNet output to standard format
-#	$lastID = $queue[-1];
-#	chomp($lastID);
-#	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'DawnRank.scriptsDir'}/parse_to_standard_output.pl --in $outDir/res_driver_net.dat --out $resultsDir/DawnRank.result";
-#	$command = $command . " --debug" if ($flag_debug);
-#	submit($command);
+	# Parse DriverNet output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'DawnRank.scriptsDir'}/parse_to_standard_output.pl --in $outDir/driver_list.dat --out $resultsDir/DawnRank.result";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
 	
 	print "Job submitted.\n";
 }
