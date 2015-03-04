@@ -6,6 +6,8 @@
 
 library(DawnRank);
 
+argv <- commandArgs(TRUE)
+
 expressionMatrix <- read.table(argv[1], header=T);
 mutationMatrix <- read.table(argv[2], header=T);
 adjMatrix <- read.table(argv[3], header=T);
