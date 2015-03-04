@@ -227,14 +227,14 @@ sub generateConfig {
 		}
 		when( 'DriverNet' ){
 			print OUT "dataDir=$config{'DriverNet.dataDir'}\n";
-			print OUT "outDir=$analysisDir/$software\n";
+			print OUT "outDir=$analysisDir/" . uc $software . "\n";
 			print OUT "expData=$config{'DriverNet.expData'}\n";
 			print OUT "numProc=$config{'cluster.numThreads'}\n";
 			print OUT "scriptsDir=$config{'DriverNet.tcgaDir'}\n";
 			continue;
 		}
 		when( 'MutSigCV' ){
-			print OUT "outDir=$analysisDir/$software\n";
+			print OUT "outDir=$analysisDir/" . uc $software . "\n";
 			print OUT "matlab=$config{'MutSigCV.matlab'}\n";
 			print OUT "maf=$config{'MutSigCV.maf'}\n";
 			print OUT "coverage=$config{'MutSigCV.coverage'}\n";
@@ -248,7 +248,7 @@ sub generateConfig {
 			print OUT "adj=$config{'DawnRank.adj'}\n";
 			print OUT "exp=$config{'DawnRank.exp'}\n";
 			print OUT "mut=$config{'DawnRank.mut'}\n";
-			print OUT "outDir=$analysisDir/$software\n";
+			print OUT "outDir=$analysisDir/" . uc $software . "\n";
 			print OUT "scriptsDir=$config{'DawnRank.scriptsDir'}\n";
 			continue;
 		}
