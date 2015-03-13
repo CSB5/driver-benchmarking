@@ -7,9 +7,9 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "2.0.3";
+my $version = "v3.0.0";
 my $date = strftime '%Y%m%d', localtime;
-my $runID = "${version}_${date}";
+my $runID = "${date}_${version}";
 
 my ( $configFile, $flag_debug, $flag_help, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir );
 my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -v PATH,PERL5LIB,R_LIBS_SITE,MOSEKLM_LICENSE_FILE,AUGUSTUS_CONFIG_PATH,CLASSPATH";
@@ -60,12 +60,13 @@ print "done.\n";
 
 # Preparing output folders
 print "Preparing output folders. Please wait...";
-my $analysisDir = "$config{'general.analysisDir'}/$runID";
-my $resultsDir = "$analysisDir/CONSOLIDATED_RESULTS";
+my $analysisDir;
+my $resultsDir = "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/$runID";
+system("mkdir -p $resultsDir") unless (-e $resultsDir);
+system("cp $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/* $resultsDir") if(-e "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/");
+system("ln -sfn $resultsDir $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST");
 my $logsDir = "$analysisDir/LOGS";
-system("mkdir -p $analysisDir") unless (-d $analysisDir);
-system("mkdir -p $resultsDir") unless (-d $resultsDir);
-system("mkdir -p $logsDir") unless (-d $logsDir);
+system("mkdir -p $logsDir") unless (-e $logsDir);
 print "done.\n";
 
 # Initializing variables
@@ -81,10 +82,14 @@ print "done.\n";
 # oncoIMPACT
 if($config{'general.oncoIMPACT'}){	
 	print "Running oncoIMPACT. Please wait...";
+
+	# Initialise folder		
+	$analysisDir = "$config{'general.analysisDir'}/ONCOIMPACT/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCOIMPACT/LATEST");
 	
 	# Generate config file
-	generateConfig("oncoIMPACT");
-	
+	generateConfig("oncoIMPACT");	
 	
 	# Run oncoIMPACT
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_oncoIMPACT -e $logsDir/oncoIMPACT.error.log -o $logsDir/oncoIMPACT.run.log $config{'oncoIMPACT.scriptsDir'}/oncoIMPACT.pl $analysisDir/oncoIMPACT_$runID.cfg $config{'oncoIMPACT.subSample'}";
@@ -94,7 +99,7 @@ if($config{'general.oncoIMPACT'}){
 	# Parse oncoIMPACT output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $logsDir/oncoIMPACT_parseOutput.error.log -o $logsDir/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'oncoIMPACT.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/oncoIMPACT_analysis/GENE_LIST/ALTERATION.dat --out $resultsDir/oncoIMPACT.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $logsDir/oncoIMPACT_parseOutput.error.log -o $logsDir/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'oncoIMPACT.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/ANALYSIS/GENE_LIST/ALTERATION.dat --out $resultsDir/oncoIMPACT.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -107,8 +112,9 @@ if($config{'general.DriverNet'}){
 	print "Running DriverNet. Please wait...";
 	
 	# Initialise folder
-	$outDir = "$analysisDir/DRIVERNET";
-	system("mkdir -p $outDir") unless (-d $outDir);
+	$analysisDir = "$config{'general.analysisDir'}/DRIVERNET/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/DRIVERNET/LATEST");
 	
 	# Generate config file
 	generateConfig("DriverNet");
@@ -121,7 +127,7 @@ if($config{'general.DriverNet'}){
 	# Parse DriverNet output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DriverNet_parseOutput -e $logsDir/DriverNet_parseOutput.error.log -o $logsDir/DriverNet_parseOutput.run.log -hold_jid $lastID $config{'DriverNet.scriptsDir'}/parse_to_standard_output.pl --in $outDir/res_driver_net.dat --out $resultsDir/DriverNet.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DriverNet_parseOutput -e $logsDir/DriverNet_parseOutput.error.log -o $logsDir/DriverNet_parseOutput.run.log -hold_jid $lastID $config{'DriverNet.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/res_driver_net.dat --out $resultsDir/DriverNet.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -133,9 +139,10 @@ if($config{'general.DriverNet'}){
 if($config{'general.MutSigCV'}){
 	print "Running MutSigCV. Please wait...";
 	
-	# Initialise folder	
-	$outDir = "$analysisDir/MUTSIGCV";
-	system("mkdir -p $outDir") unless (-d $outDir);
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/MUTSIGCV/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/MUTSIGCV/LATEST");
 	
 	# Generate config file
 	generateConfig("MutSigCV");
@@ -160,7 +167,7 @@ if($config{'general.MutSigCV'}){
 	# Parse MutSigCV output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_parseOutput -e $logsDir/MutSigCV_parseOutput.error.log -o $logsDir/MutSigCV_parseOutput.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/parse_to_standard_output.pl --in $outDir/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
+	$command = "$$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_parseOutput -e $logsDir/MutSigCV_parseOutput.error.log -o $logsDir/MutSigCV_parseOutput.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -173,8 +180,9 @@ if($config{'general.DawnRank'}){
 	print "Running DawnRank. Please wait...";
 	
 	# Initialise folder
-	$outDir = "$analysisDir/DAWNRANK";
-	system("mkdir -p $outDir") unless (-d $outDir);
+	$analysisDir = "$config{'general.analysisDir'}/DAWNRANK/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/DAWNRANK/LATEST");
 	
 	# Generate config file
 	generateConfig("DawnRank");
@@ -187,7 +195,7 @@ if($config{'general.DawnRank'}){
 	# Parse DriverNet output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'DawnRank.scriptsDir'}/parse_to_standard_output.pl --in $outDir/driver_list.dat --out $resultsDir/DawnRank.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'DawnRank.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/driver_list.dat --out $resultsDir/DawnRank.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -227,14 +235,14 @@ sub generateConfig {
 		}
 		when( 'DriverNet' ){
 			print OUT "dataDir=$config{'DriverNet.dataDir'}\n";
-			print OUT "outDir=$analysisDir/" . uc $software . "\n";
+			print OUT "outDir=$analysisDir\n";
 			print OUT "expData=$config{'DriverNet.expData'}\n";
 			print OUT "numProc=$config{'cluster.numThreads'}\n";
 			print OUT "scriptsDir=$config{'DriverNet.tcgaDir'}\n";
 			continue;
 		}
 		when( 'MutSigCV' ){
-			print OUT "outDir=$analysisDir/" . uc $software . "\n";
+			print OUT "outDir=$analysisDir\n";
 			print OUT "matlab=$config{'MutSigCV.matlab'}\n";
 			print OUT "maf=$config{'MutSigCV.maf'}\n";
 			print OUT "coverage=$config{'MutSigCV.coverage'}\n";
@@ -248,7 +256,7 @@ sub generateConfig {
 			print OUT "adj=$config{'DawnRank.adj'}\n";
 			print OUT "exp=$config{'DawnRank.exp'}\n";
 			print OUT "mut=$config{'DawnRank.mut'}\n";
-			print OUT "outDir=$analysisDir/" . uc $software . "\n";
+			print OUT "outDir=$analysisDir\n";
 			print OUT "scriptsDir=$config{'DawnRank.scriptsDir'}\n";
 			continue;
 		}
