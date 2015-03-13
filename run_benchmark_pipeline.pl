@@ -92,7 +92,7 @@ if($config{'general.oncoIMPACT'}){
 	generateConfig("oncoIMPACT");	
 	
 	# Run oncoIMPACT
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_oncoIMPACT -e $logsDir/oncoIMPACT.error.log -o $logsDir/oncoIMPACT.run.log $config{'oncoIMPACT.scriptsDir'}/oncoIMPACT.pl $analysisDir/oncoIMPACT_$runID.cfg $config{'oncoIMPACT.subSample'}";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_oncoIMPACT -e $logsDir/oncoIMPACT.error.log -o $logsDir/oncoIMPACT.run.log $config{'oncoIMPACT.scriptsDir'}/oncoIMPACT.pl $analysisDir/oncoIMPACT_$runID.cfg";
 	$command = $command . " 1" if ($flag_debug);
 	submit($command);
 	
@@ -231,6 +231,8 @@ sub generateConfig {
 			print OUT "cnv=$config{'oncoIMPACT.cnv'}\n";
 			print OUT "exp=$config{'oncoIMPACT.exp'}\n";
 			print OUT "snp=$config{'oncoIMPACT.snp'}\n";
+			print OUT "dataType=$config{'oncoIMPACT.dataType'}\n";
+			print OUT "databaseExport=$config{'oncoIMPACT.databaseExport'}\n";
 			continue;
 		}
 		when( 'DriverNet' ){
