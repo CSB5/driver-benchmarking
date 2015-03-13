@@ -15,7 +15,7 @@ my %threshold_list =
 
 my %method_ID = ();
 my @ID_to_method = ();
-my %sample_list = ();
+my %the_sample_list = ();
 
 #
 #To update using that file:
@@ -44,11 +44,11 @@ while(<FILE>){
     foreach $s_m (@sample_info_tmp){
 	@tmp = split(/\:/, $s_m);
 	$sample = $tmp[0];
-	$sample_list{$sample} = 1;
+	$the_sample_list{$sample} = 1;
 	push(@sample_info, $sample);
     }
     
-    #Update the geneannotation
+    #Update the gene annotation
     my %gene_annot = ("MUT_FREQ", $mut_freq, "STATUS", $gene_status, "SAMPLE", \@sample_info);
     $data_gene_annotation{$gene} = \%gene_annot;
     
@@ -153,8 +153,12 @@ foreach $threshold_type (keys %threshold_list){
 	}
 	
 	#For sample driver coverage boxplot files
-	$boxplot_file = write_boxplot_file($threshold_type, $threshold_val, $gene_status_selection);
-	plot_boxplot($boxplot_file, "$threshold_type\_$threshold_val");
+	#$boxplot_file = write_boxplot_sample_cov_file($threshold_type, $threshold_val, $gene_status_selection);
+	#plot_boxplot_sample_cov($boxplot_file, "$threshold_type\_$threshold_val");
+	
+	$barplot_file = write_barplot_sample_cov_file($threshold_type, $threshold_val, $gene_status_selection);
+	plot_barplot_sample_cov($barplot_file, "$threshold_type\_$threshold_val");#exit(0);
+	#plot_boxplot_sample_cov($boxplot_file, "$threshold_type\_$threshold_val");
 
 	#For the barplot pairwise comparision files
 	#$matrix_file = write_barplot_file($threshold_type, $threshold_val, $gene_status_selection);
@@ -169,7 +173,120 @@ foreach $threshold_type (keys %threshold_list){
     }
 }
 
-sub write_boxplot_file{
+
+sub write_barplot_sample_cov_file{
+
+    my ($threshold_type, $threshold_val, $gene_status_selection) = @_;
+
+    my @category = (0, 0, 
+		    1, 4,
+		    5, 10,
+		    11, 20,
+		    21, 100000
+	);
+    my $nb_cat = @category / 2;
+    
+    my $barplot_file = "$out_dir/barplot_sample_cov_$threshold_type\_$threshold_val";
+    if($gene_status_selection ne ""){
+	$barplot_file .= "\_$gene_status_selection";
+    }
+    
+    
+    #Compute the barplot value according to the defined categories
+    my %method_cat_value = ();
+    for(my $i = 0; $i < @ID_to_method; $i++){
+	$method = $ID_to_method[$i];
+	my @tab = ();for(my $j = 0; $j < $nb_cat; $j++){push(@tab, 0)};
+	$method_cat_value{$method} = \@tab;
+	foreach $sample (keys %the_sample_list){
+	    $nb_sample_driver = 0;
+	    if(exists $method_sample_driver{$method}->{$sample}){
+		$nb_sample_driver = $method_sample_driver{$method}->{$sample};
+	    }
+	    
+	    #print STDERR " **** => $sample $nb_sample_driver\n" if($method eq "freq");
+
+	    #Find the category
+	    for(my $j = 0; $j < @category+0; $j+=2){
+		if($category[$j] <= $nb_sample_driver && $nb_sample_driver <= $category[$j+1]){
+		    #print STDERR " **** **** **** **** => $sample $nb_sample_driver cat:".($j/2)." -> $method_cat_value{$method}->[$j/2]\n" if($method eq "freq");
+		    $method_cat_value{$method}->[$j/2]++;
+		    last;
+		}
+	    }
+	}
+    }
+    
+    #Write the file
+    my $nb_sample = keys(%the_sample_list);
+    open(OUT, ">$barplot_file.dat");
+    #The header
+    print OUT "".(join("\t", @ID_to_method))."\n";
+    for(my $j = 0; $j < @category; $j+=2){
+	#The column name
+	$str = "\"[$category[$j],$category[$j+1]]\"";
+	$str = $category[$j] if($category[$j] == $category[$j+1]);
+	$str = "\">".($category[$j]-1)."\"" if($category[$j+1] == $category[@category-1]);
+	print OUT $str;
+	
+	for(my $i = 0; $i < @ID_to_method; $i++){
+	    $method = $ID_to_method[$i];
+	    #print OUT "\t".$method_cat_value{$method}->[$j/2];
+	    print OUT "\t".($method_cat_value{$method}->[$j/2]/$nb_sample);
+	}
+	print OUT "\n";
+    }
+    close(OUT);
+
+    return $barplot_file;
+    
+}
+
+sub plot_barplot_sample_cov{
+    my ($matrix_file, $title) = @_;
+    
+    my $font_size = 3;
+    my $note_font_size = 8;
+    my $margin_size = 30; 
+
+    open(OUT, ">$matrix_file.R");
+    
+    print OUT "pdf(file=\"$matrix_file.pdf\",
+	paper=\"special\",
+	width=10,
+	height=10
+	)\n";
+    print OUT "profile <- read.table(\"$matrix_file.dat\", header = TRUE)\n";
+    
+    #Compute the freqency
+    #if(! $raw_val){
+    #foreach $method (@ID_to_method){
+    #print OUT "profile\$$method = profile\$$method/sum(profile\$$method)\n";
+#}
+#}
+
+    print OUT "profile_mat = as.matrix(profile)\n";
+    print OUT "palette <- colorRampPalette(c('#f0f3ff','#0033BB'))(nrow(profile))\n";
+    print OUT "barplot(profile_mat, main=\"$title\", col=palette,  cex.lab=$font_size, cex.names=2, cex.axis = $font_size, cex.main= $font_size)\n";
+    print OUT "dev.off()\n";
+
+    if(index($matrix_file, "RANK") == -1){
+	print OUT "pdf(file=\"$out_dir/legend.pdf\",
+	paper=\"special\",
+	width=10,
+	height=10
+	)\n";
+	print OUT "plot(0,type='n',axes=FALSE,ann=FALSE)\n";
+	print OUT "legend(\"top\", legend = rownames(profile), fill = palette, cex=2)\n";
+	print OUT "dev.off()";
+    }
+    
+    close(OUT);
+    
+    run_exe("R --vanilla < $matrix_file.R");
+}
+
+sub write_boxplot_sample_cov_file{
      my ($threshold_type, $threshold_val, $gene_status_selection) = @_;
      my $boxplot_file = "$out_dir/sample_cov_$threshold_type\_$threshold_val";
      if($gene_status_selection ne ""){
@@ -181,7 +298,7 @@ sub write_boxplot_file{
      #The header
      print OUT "".(join("\t", @ID_to_method))."\n";
      
-     foreach $sample (keys %sample_list){
+     foreach $sample (keys %the_sample_list){
 	 print OUT $sample;
 	 for(my $i = 0; $i < @ID_to_method; $i++){
 	     $method = $ID_to_method[$i];
@@ -200,7 +317,7 @@ sub write_boxplot_file{
 
 }
 
-sub plot_boxplot{
+sub plot_boxplot_sample_cov{
     my ($matrix_file, $title) = @_;
     
     my $font_size = 3;
