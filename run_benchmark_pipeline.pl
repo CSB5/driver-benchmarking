@@ -149,7 +149,7 @@ if($config{'general.MutSigCV'}){
 	
 	# Filter TCGA MAF file
 	if($config{'MutSigCV.flagFilter'}){
-		$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_filterMAF -e $logsDir/MutSigCV_filterMAF.error.log -o $logsDir/MutSigCV_filterMAF.run.log $config{'MutSigCV.scriptsDir'}/filter_maf.pl --samples $config{'general.completeSamples'} --maf $config{'MutSigCV.maf'} --outDir $config{'MutSigCV.dataDir'}";
+		$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_filterMAF -e $logsDir/MutSigCV_filterMAF.error.log -o $logsDir/MutSigCV_filterMAF.run.log $config{'MutSigCV.scriptsDir'}/filter_maf.pl --samples $config{'general.completeSamples'} --maf $config{'MutSigCV.maf'} --outDir $analysisDir";
 		$command = $command . " --debug" if ($flag_debug);
 		submit($command);
 		
@@ -160,14 +160,14 @@ if($config{'general.MutSigCV'}){
 	}
 	
 	# Run MutSigCV
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV -e $logsDir/MutSigCV.error.log -o $logsDir/MutSigCV.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/run_MutSigCV.pl --config $analysisDir/MutSigCV_$runID.cfgs";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV -e $logsDir/MutSigCV.error.log -o $logsDir/MutSigCV.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/run_MutSigCV.pl --config $analysisDir/MutSigCV_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
 	# Parse MutSigCV output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_parseOutput -e $logsDir/MutSigCV_parseOutput.error.log -o $logsDir/MutSigCV_parseOutput.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_parseOutput -e $logsDir/MutSigCV_parseOutput.error.log -o $logsDir/MutSigCV_parseOutput.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -244,9 +244,15 @@ sub generateConfig {
 			continue;
 		}
 		when( 'MutSigCV' ){
-			print OUT "outDir=$analysisDir\n";
+			my $temp = $analysisDir;
+			$temp =~ s/projects/pnsg10_projects/g;
+			print OUT "outDir=$temp\n";
 			print OUT "matlab=$config{'MutSigCV.matlab'}\n";
-			print OUT "maf=$config{'MutSigCV.maf'}\n";
+			if($config{'MutSigCV.flagFilter'}){
+				print OUT "maf=$temp/TCGA_somatic_mutations.filtered.maf\n";
+			} else {
+				print OUT "maf=$config{'MutSigCV.maf'}\n";
+			}
 			print OUT "coverage=$config{'MutSigCV.coverage'}\n";
 			print OUT "covariate=$config{'MutSigCV.covariate'}\n";
 			print OUT "dict=$config{'MutSigCV.dict'}\n";
