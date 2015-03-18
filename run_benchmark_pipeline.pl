@@ -236,9 +236,9 @@ sub generateConfig {
 			continue;
 		}
 		when( 'DriverNet' ){
-			print OUT "dataDir=$config{'DriverNet.dataDir'}\n";
 			print OUT "outDir=$analysisDir\n";
 			print OUT "expData=$config{'DriverNet.expData'}\n";
+			print OUT "mutMatrix=$config{'DriverNet.mutMatrix'}\n";
 			print OUT "numProc=$config{'cluster.numThreads'}\n";
 			print OUT "scriptsDir=$config{'DriverNet.tcgaDir'}\n";
 			continue;
