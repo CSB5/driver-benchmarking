@@ -65,7 +65,7 @@ my $resultsDir = "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/$runID";
 system("mkdir -p $resultsDir") unless (-e $resultsDir);
 system("cp $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/* $resultsDir") if(-e "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/");
 system("ln -sfn $resultsDir $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST");
-my $logsDir = "$analysisDir/LOGS";
+my $logsDir = "$config{'general.analysisDir'}/LOGS";
 system("mkdir -p $logsDir") unless (-e $logsDir);
 print "done.\n";
 
