@@ -71,7 +71,7 @@ print "done.\n";
 
 # Initializing variables
 print "Initializing variables. Please wait...";
-open( TRACE, "> $analysisDir/LOGS/trace.log" );
+open( TRACE, "> $config{'general.analysisDir'}/LOGS/trace.log" );
 @queue = ();
 my $runtime = "$config{'cluster.runtime'}:0:0";
 print "done.\n";
@@ -160,7 +160,7 @@ if($config{'general.MutSigCV'}){
 	}
 	
 	# Run MutSigCV
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV -e $logsDir/MutSigCV.error.log -o $logsDir/MutSigCV.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/run_MutSigCV.pl --config $analysisDir/MutSigCV_$runID.cfg'}";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV -e $logsDir/MutSigCV.error.log -o $logsDir/MutSigCV.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/run_MutSigCV.pl --config $analysisDir/MutSigCV_$runID.cfgs";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
