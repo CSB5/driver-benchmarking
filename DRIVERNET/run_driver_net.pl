@@ -4,7 +4,7 @@ use warnings;
 use Config::Simple;
 use Getopt::Long;
 
-my ($configFile, %config, $nb_random_test_by_proc);
+my ($configFile, %config, $nb_random_test_by_proc, $flag_debug, $flag_help);
 
 my $help_message = "
 This script runs DriverNet.

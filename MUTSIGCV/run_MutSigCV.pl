@@ -4,7 +4,7 @@ use warnings;
 use Config::Simple;
 use Getopt::Long;
 
-my ($configFile, %config);
+my ($configFile, %config, $flag_debug, $flag_help);
 
 my $help_message = "
 This script runs MutSigCV.
