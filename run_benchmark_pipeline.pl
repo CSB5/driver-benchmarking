@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.0.1";
+my $version = "v3.1.0";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -175,32 +175,76 @@ if($config{'general.MutSigCV'}){
 }
 
 
-# DawnRank
-if($config{'general.DawnRank'}){
-	print "Running DawnRank. Please wait...";
+# OncodriveFM
+if($config{'general.OncodriveFM'}){
+	print "Running OncodriveFM. Please wait...";
 	
 	# Initialise folder
-	$analysisDir = "$config{'general.analysisDir'}/DAWNRANK/$runID";
+	$analysisDir = "$config{'general.analysisDir'}/ONCODRIVEFM/$runID";
 	system("mkdir -p $analysisDir") unless (-e $analysisDir);
-	system("ln -sfn $analysisDir $config{'general.analysisDir'}/DAWNRANK/LATEST");
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCODRIVEFM/LATEST");
 	
 	# Generate config file
-	generateConfig("DawnRank");
+	generateConfig("OncodriveFM");
 	
-	# Run DriverNet
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_DawnRank -e $logsDir/DawnRank.error.log -o $logsDir/DawnRank.run.log $config{'DawnRank.scriptsDir'}/run_DawnRank.pl --config $analysisDir/DawnRank_$runID.cfg";
+	# Run OncodriveFM
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_OncodriveFM -e $logsDir/OncodriveFM.error.log -o $logsDir/OncodriveFM.run.log $config{'OncodriveFM.scriptsDir'}/run_OncodriveFM.pl --config $analysisDir/OncodriveFM_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
-	# Parse DriverNet output to standard format
+	# Parse OncodriveFM output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'DawnRank.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/driver_list.dat --out $resultsDir/DawnRank.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveFM_parseOutput -e $logsDir/OncodriveFM_parseOutput.error.log -o $logsDir/OncodriveFM_parseOutput.run.log -hold_jid $lastID $config{'OncodriveFM.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/OncodriveFM-genes.tsv --out $resultsDir/OncodriveFM.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
 	print "Job submitted.\n";
 }
+
+
+# LJB
+if($config{'general.LJB'}){
+	print "Running LJB. Please wait...";
+	
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/LJB/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/LJB/LATEST");	
+	
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_LJB_parseOutput -e $logsDir/LJB_parseOutput.error.log -o $logsDir/LJB_parseOutput.run.log $config{'LJB.scriptsDir'}/parse_to_standard_output.pl --in $config{'LJB.annotation'} --outDir $resultsDir";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	print "Job submitted.\n";
+}
+
+## DawnRank
+#if($config{'general.DawnRank'}){
+#	print "Running DawnRank. Please wait...";
+#	
+#	# Initialise folder
+#	$analysisDir = "$config{'general.analysisDir'}/DAWNRANK/$runID";
+#	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+#	system("ln -sfn $analysisDir $config{'general.analysisDir'}/DAWNRANK/LATEST");
+#	
+#	# Generate config file
+#	generateConfig("DawnRank");
+#	
+#	# Run DriverNet
+#	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_DawnRank -e $logsDir/DawnRank.error.log -o $logsDir/DawnRank.run.log $config{'DawnRank.scriptsDir'}/run_DawnRank.pl --config $analysisDir/DawnRank_$runID.cfg";
+#	$command = $command . " --debug" if ($flag_debug);
+#	submit($command);
+#	
+#	# Parse DriverNet output to standard format
+#	$lastID = $queue[-1];
+#	chomp($lastID);
+#	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'DawnRank.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/driver_list.dat --out $resultsDir/DawnRank.result";
+#	$command = $command . " --debug" if ($flag_debug);
+#	submit($command);
+#	
+#	print "Job submitted.\n";
+#}
 
 
 close(TRACE);
@@ -258,6 +302,13 @@ sub generateConfig {
 			print OUT "dict=$config{'MutSigCV.dict'}\n";
 			print OUT "chr=$config{'MutSigCV.chr'}\n";
 			print OUT "prefix=$config{'MutSigCV.prefix'}\n";
+			continue;
+		}		
+		when( 'OncodriveFM' ){
+			print OUT "outDir=$analysisDir\n";
+			print OUT "annotation=$config{'OncodriveFM.annotation'}\n";
+			print OUT "mappingFile=$config{'OncodriveFM.mappingFile'}\n";
+			print OUT "numThreads=$config{'cluster.numThreads'}\n";
 			continue;
 		}
 		when( 'DawnRank' ){
