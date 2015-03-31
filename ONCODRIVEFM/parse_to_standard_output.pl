@@ -55,7 +55,7 @@ if ($flag_debug) {
 my ($counter, @temp, $gene, $qval);
 my $qval_threshold = 0.05;
 $counter = 1;
-open(IN, $file_in);
+open(IN, "sort -k2,2g $file_in |");
 open(OUT, "> $file_out");
 <IN>;	# skip header
 <IN>;	# skip header

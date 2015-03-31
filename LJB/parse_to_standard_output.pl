@@ -34,7 +34,7 @@ if ( @ARGV == 0 ) {
 
 GetOptions(
 	"in=s"      	=> \$file_in,
-	"out=s"         => \$outDir,
+	"outDir=s"         => \$outDir,
 	"debug"         => \$flag_debug,
 	"help"          => \$flag_help
 ) or die("Error in command line arguments.\n");
@@ -77,7 +77,7 @@ close(IN);
 
 # Polyphen2_HVAR_score
 $counter = 1;
-$threshold = 0.909; # sensitive mode
+$threshold = 0.909; # stringent mode
 # $threshold = 0.446; # relaxed mode
 %reportedGenes = ();
 $file_out = "$outDir/Polyphen2_HVAR.result";
@@ -110,7 +110,7 @@ while(<IN>){
 	$score = $temp[1];
 	$type = $temp[2];
 	next if ($score eq "." || exists $reportedGenes{$gene});
-	next unless ($type eq "H"	# sensitive mode
+	next unless ($type eq "H"	# stringent mode
 				 #|| $type eq "M" # relaxed mode
 	);
 	print OUT $gene . "\t" . "ALL" . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";

@@ -113,11 +113,7 @@ close(OUT);
 
 
 # Run OncodriveFM
-$command = "export PATH=/mnt/software/unstowable/anaconda/bin/:\$PATH; source activate oncodrivefm";
-print STDERR "$command\n" if $flag_debug;
-system($command);
-
-$command = "oncodrivefm -e median -m $config{'default.mappingFile'} -j $config{'default.numThreads'} $out_dir/OncodriveFM.txt";
+$command = "export PATH=/mnt/software/unstowable/anaconda/bin/:\$PATH; source activate oncodrivefm; oncodrivefm -e median -m $config{'default.mappingFile'} -j $config{'default.numThreads'} -o $out_dir/ $out_dir/OncodriveFM.txt";
 print STDERR "$command\n" if $flag_debug;
 system($command);
 
