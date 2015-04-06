@@ -62,9 +62,11 @@ print "done.\n";
 print "Preparing output folders. Please wait...";
 my $analysisDir;
 my $resultsDir = "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/$runID";
-system("mkdir -p $resultsDir") unless (-e $resultsDir);
-system("cp $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/* $resultsDir") if(-e "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/");
-system("ln -sfn $resultsDir $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST");
+unless (-e $resultsDir){
+	system("mkdir -p $resultsDir");
+	system("cp $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/* $resultsDir") if(-e "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/");
+	system("ln -sfn $resultsDir $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST");
+}
 my $logsDir = "$config{'general.analysisDir'}/LOGS";
 system("mkdir -p $logsDir") unless (-e $logsDir);
 print "done.\n";
@@ -85,8 +87,10 @@ if($config{'general.oncoIMPACT'}){
 
 	# Initialise folder		
 	$analysisDir = "$config{'general.analysisDir'}/ONCOIMPACT/$runID";
-	system("mkdir -p $analysisDir") unless (-e $analysisDir);
-	system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCOIMPACT/LATEST");
+	unless (-e $analysisDir){
+		system("mkdir -p $analysisDir");
+		system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCOIMPACT/LATEST");
+	}
 	
 	# Generate config file
 	generateConfig("oncoIMPACT");	
@@ -113,8 +117,10 @@ if($config{'general.DriverNet'}){
 	
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/DRIVERNET/$runID";
-	system("mkdir -p $analysisDir") unless (-e $analysisDir);
-	system("ln -sfn $analysisDir $config{'general.analysisDir'}/DRIVERNET/LATEST");
+	unless (-e $analysisDir){
+		system("mkdir -p $analysisDir");
+		system("ln -sfn $analysisDir $config{'general.analysisDir'}/DRIVERNET/LATEST");
+	}
 	
 	# Generate config file
 	generateConfig("DriverNet");
@@ -141,8 +147,10 @@ if($config{'general.MutSigCV'}){
 	
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/MUTSIGCV/$runID";
-	system("mkdir -p $analysisDir") unless (-e $analysisDir);
-	system("ln -sfn $analysisDir $config{'general.analysisDir'}/MUTSIGCV/LATEST");
+	unless (-e $analysisDir){
+		system("mkdir -p $analysisDir");
+		system("ln -sfn $analysisDir $config{'general.analysisDir'}/MUTSIGCV/LATEST");
+	}
 	
 	# Generate config file
 	generateConfig("MutSigCV");
@@ -181,8 +189,10 @@ if($config{'general.OncodriveFM'}){
 	
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/ONCODRIVEFM/$runID";
-	system("mkdir -p $analysisDir") unless (-e $analysisDir);
-	system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCODRIVEFM/LATEST");
+	unless (-e $analysisDir){
+		system("mkdir -p $analysisDir");
+		system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCODRIVEFM/LATEST");
+	}
 	
 	# Generate config file
 	generateConfig("OncodriveFM");
@@ -209,8 +219,10 @@ if($config{'general.LJB'}){
 	
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/LJB/$runID";
-	system("mkdir -p $analysisDir") unless (-e $analysisDir);
-	system("ln -sfn $analysisDir $config{'general.analysisDir'}/LJB/LATEST");	
+	unless (-e $analysisDir){
+		system("mkdir -p $analysisDir");
+		system("ln -sfn $analysisDir $config{'general.analysisDir'}/LJB/LATEST");
+	}	
 	
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_LJB_parseOutput -e $logsDir/LJB_parseOutput.error.log -o $logsDir/LJB_parseOutput.run.log $config{'LJB.scriptsDir'}/parse_to_standard_output.pl --in $config{'LJB.annotation'} --outDir $resultsDir";
 	$command = $command . " --debug" if ($flag_debug);
