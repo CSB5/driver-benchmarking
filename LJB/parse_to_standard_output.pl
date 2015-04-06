@@ -80,7 +80,7 @@ $counter = 1;
 $threshold = 0.909; # stringent mode
 # $threshold = 0.446; # relaxed mode
 %reportedGenes = ();
-$file_out = "$outDir/Polyphen2_HVAR.result";
+$file_out = "$outDir/PolyPhen2.result";
 open(IN, "cut -f 7,17 $file_in | tail -n+2 | sort -k2,2nr |");
 open(OUT, "> $file_out");
 print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
