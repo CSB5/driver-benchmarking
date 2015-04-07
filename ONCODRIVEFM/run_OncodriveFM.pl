@@ -10,7 +10,7 @@ my $help_message = "
 This script runs OncodriveFM.
 
 Usage:
-	run_driver_net.pl [OPTIONS]
+	run_OncodriveFM.pl [OPTIONS]
 
 Options:
 	--config = path to config file *
