@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.1.0";
+my $version = "v3.1.1";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -231,6 +231,36 @@ if($config{'general.LJB'}){
 	print "Job submitted.\n";
 }
 
+
+# OncodriveCLUST
+if($config{'general.OncodriveCLUST'}){
+	print "Running OncodriveCLUST. Please wait...";
+	
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/ONCODRIVECLUST/$runID";
+	unless (-e $analysisDir){
+		system("mkdir -p $analysisDir");
+		system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCODRIVECLUST/LATEST");
+	}
+	
+	# Generate config file
+	generateConfig("OncodriveCLUST");
+	
+	# Run OncodriveCLUST
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_OncodriveCLUST -e $logsDir/OncodriveCLUST.error.log -o $logsDir/OncodriveCLUST.run.log $config{'OncodriveCLUST.scriptsDir'}/run_OncodriveCLUST.pl --config $analysisDir/OncodriveCLUST_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	# Parse OncodriveCLUST output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCLUST_parseOutput -e $logsDir/OncodriveCLUST_parseOutput.error.log -o $logsDir/OncodriveCLUST_parseOutput.run.log -hold_jid $lastID $config{'OncodriveCLUST.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/oncodriveclust-results.tsv --out $resultsDir/OncodriveCLUST.result";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	print "Job submitted.\n";
+}
+
 ## DawnRank
 #if($config{'general.DawnRank'}){
 #	print "Running DawnRank. Please wait...";
@@ -329,6 +359,12 @@ sub generateConfig {
 			print OUT "mut=$config{'DawnRank.mut'}\n";
 			print OUT "outDir=$analysisDir\n";
 			print OUT "scriptsDir=$config{'DawnRank.scriptsDir'}\n";
+			continue;
+		}		
+		when( 'OncodriveCLUST' ){
+			print OUT "outDir=$analysisDir\n";
+			print OUT "annotation=$config{'OncodriveCLUST.annotation'}\n";
+			print OUT "transcript=$config{'OncodriveCLUST.transcript'}\n";
 			continue;
 		}
 		default{
