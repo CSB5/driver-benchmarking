@@ -189,7 +189,7 @@ close(FILE);
 
 
 # Run OncodriveCLUST
-$command = "export PATH=/mnt/software/unstowable/anaconda/bin/:\$PATH; source activate oncodriveclust; oncodriveclust -m 3 -o $out_dir/ $out_dir/nonsyn.txt $out_dir/syn.txt $transcript_file";
+$command = "export PATH=/mnt/software/unstowable/anaconda/bin/:\$PATH; source activate oncodriveclust; oncodriveclust -m 3 -o $out_dir/oncodriveclust-results.tsv $out_dir/nonsyn.txt $out_dir/syn.txt $transcript_file";
 print STDERR "$command\n" if $flag_debug;
 system($command);
 
