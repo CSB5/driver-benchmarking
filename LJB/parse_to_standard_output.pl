@@ -4,7 +4,7 @@ use warnings;
 use Getopt::Long;
 use List::Util qw(sum);
 
-my ($file_in, $outDir, $file_out, $flag_debug, $flag_help);
+my ($file_in, $numSamples, $outDir, $file_out, $flag_debug, $flag_help);
 
 my $help_message = "
 This script parses ANNOVAR's annotation output to a standard output for LJB methods.
@@ -14,6 +14,7 @@ Usage:
 
 Options:
 	--in = path to ANNOVAR's annotation results file *
+	--samples = number of samples *
 	--outDir = path to output folder *
 	--debug: prints trace to STDERR
 	--help : prints this message 
@@ -35,7 +36,8 @@ if ( @ARGV == 0 ) {
 
 GetOptions(
 	"in=s"      	=> \$file_in,
-	"outDir=s"         => \$outDir,
+	"samples=i"		=> \$numSamples,
+	"outDir=s"      => \$outDir,
 	"debug"         => \$flag_debug,
 	"help"          => \$flag_help
 ) or die("Error in command line arguments.\n");
@@ -53,7 +55,7 @@ if ($flag_debug) {
 }
 
 
-my ($counter, @temp, $gene, $score, $type, $threshold, %reportedGenes, $currentGene, @currentScore);
+my ($counter, @temp, $gene, $score, $type, $threshold, %reportedGenes, $currentGene, @currentScore, $currentSample, @samples, $sample, $bestScore);
 
 sift();
 polyphen2();
@@ -61,45 +63,58 @@ mutationAssessor();
 mutationTaster();
 
 ######## sub routines ########
-sub mean {
-    return sum(@_)/@_;
-}
-
 # SIFT
 sub sift {	
 	$threshold = 0.05;
 	$file_out = "$outDir/SIFT.temp";
 	open(OUT, "> $file_out");
-	open(IN, "cut -f 7,13 $file_in | tail -n+2 | sort -k1,1 |");
+	open(IN, "cut -f 7,13,48 $file_in | tail -n+2 | sort -k1,1 -k3,3 |");
 	$currentGene = "";
 	@currentScore = ();
+	$currentSample = "";
+	$bestScore = 1;
+	@samples = ();
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
 		$gene = $temp[0];
 		$score = $temp[1];
+		$sample = $temp[2];
 		next if ($score eq "." || $score > $threshold);
 		if( $gene ne $currentGene && $currentGene ne ""){
-			print OUT $gene . "\t" . mean(@currentScore) . "\n";
+			push(@currentScore, (1 - $bestScore));
+			push(@samples, $currentSample);
+			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
 			$currentGene = "";
-			@currentScore = ();				
-		} else{
-			$currentGene = $gene if ($currentGene eq "");
-			push(@currentScore, $score);
-		}		
+			@currentScore = ();		
+			$currentSample = "";
+			$bestScore = $score;
+			@samples = ();
+		} 
+		$currentSample = $sample if ($currentSample eq "");
+		$currentGene = $gene if ($currentGene eq "");
+		if( $sample ne $currentSample){
+			push(@currentScore, (1 - $bestScore));
+			push(@samples, $currentSample);
+			$currentSample = $sample;
+			$bestScore = 1;	
+		} 
+		$bestScore = $score if ($score < $bestScore);
+		
 	}
 	close(OUT);
 	close(IN);
 		
 	$counter = 1;
 	$file_out = "$outDir/SIFT.result";
-	open(IN, "sort -k2,2n $outDir/SIFT.temp |");
+	open(IN, "sort -k2,2nr $outDir/SIFT.temp |");
 	open(OUT, "> $file_out");
 	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
 		$gene = $temp[0];
 		$score = $temp[1];
-		print OUT $gene . "\t" . "ALL" . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
+		$sample = $temp[2];
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
 		$counter++;
 	}
 	close(OUT);
@@ -114,22 +129,38 @@ sub polyphen2 {
 	# $threshold = 0.446; # relaxed mode
 	$file_out = "$outDir/PolyPhen2.temp";
 	open(OUT, "> $file_out");
-	open(IN, "cut -f 7,17 $file_in | tail -n+2 | sort -k1,1 |");
+	open(IN, "cut -f 7,17,48 $file_in | tail -n+2 | sort -k1,1 -k3,3 |");
 	$currentGene = "";
 	@currentScore = ();
+	$currentSample = "";
+	$bestScore = 0;
+	@samples = ();
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
 		$gene = $temp[0];
 		$score = $temp[1];
+		$sample = $temp[2];
 		next if ($score eq "." || $score < $threshold);
 		if( $gene ne $currentGene && $currentGene ne ""){
-			print OUT $gene . "\t" . mean(@currentScore) . "\n";
+			push(@currentScore, $bestScore);
+			push(@samples, $currentSample);
+			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
 			$currentGene = "";
-			@currentScore = ();				
-		} else{
-			$currentGene = $gene if ($currentGene eq "");
-			push(@currentScore, $score);
-		}		
+			@currentScore = ();		
+			$currentSample = "";
+			$bestScore = $score;
+			@samples = ();
+		} 
+		$currentSample = $sample if ($currentSample eq "");
+		$currentGene = $gene if ($currentGene eq "");
+		if( $sample ne $currentSample){
+			push(@currentScore, $bestScore);
+			push(@samples, $currentSample);
+			$currentSample = $sample;
+			$bestScore = 0;	
+		} 
+		$bestScore = $score if ($score > $bestScore);
+		
 	}
 	close(OUT);
 	close(IN);
@@ -143,7 +174,8 @@ sub polyphen2 {
 		chomp(@temp = split(/\t/, $_));
 		$gene = $temp[0];
 		$score = $temp[1];
-		print OUT $gene . "\t" . "ALL" . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
+		$sample = $temp[2];
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
 		$counter++;
 	}
 	close(OUT);
@@ -151,31 +183,47 @@ sub polyphen2 {
 	system("rm -f $outDir/PolyPhen2.temp");
 }
 
-
+		
 # MutationAssessor
 sub mutationAssessor {
 	$file_out = "$outDir/MutationAssessor.temp";
 	open(OUT, "> $file_out");
-	open(IN, "cut -f 7,23,24 $file_in | tail -n+2 | sort -k1,1 |");
+	open(IN, "cut -f 7,23,24,48 $file_in | tail -n+2 | sort -k1,1 -k4,4 |");
 	$currentGene = "";
 	@currentScore = ();
+	$currentSample = "";
+	$bestScore = 0;
+	@samples = ();
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
 		$gene = $temp[0];
-		$score = $temp[1];		
+		$score = $temp[1];
 		$type = $temp[2];
+		$sample = $temp[3];
 		next if ($score eq ".");
 		next unless ($type eq "H"	# stringent mode
 					 #|| $type eq "M" # relaxed mode
 		);
 		if( $gene ne $currentGene && $currentGene ne ""){
-			print OUT $gene . "\t" . mean(@currentScore) . "\t". $type . "\n";
+			push(@currentScore, $bestScore);
+			push(@samples, $currentSample);
+			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
 			$currentGene = "";
-			@currentScore = ();				
-		} else{
-			$currentGene = $gene if ($currentGene eq "");
-			push(@currentScore, $score);
-		}		
+			@currentScore = ();		
+			$currentSample = "";
+			$bestScore = $score;
+			@samples = ();
+		} 
+		$currentSample = $sample if ($currentSample eq "");
+		$currentGene = $gene if ($currentGene eq "");
+		if( $sample ne $currentSample){
+			push(@currentScore, $bestScore);
+			push(@samples, $currentSample);
+			$currentSample = $sample;
+			$bestScore = 0;	
+		} 
+		$bestScore = $score if ($score > $bestScore);
+		
 	}
 	close(OUT);
 	close(IN);
@@ -190,8 +238,9 @@ sub mutationAssessor {
 		$gene = $temp[0];
 		$score = $temp[1];
 		$type = $temp[2];
+		$sample = $temp[3];
 		next if ($score eq ".");
-		print OUT $gene . "\t" . "ALL" . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
 		$reportedGenes{$gene} = "";
 		$counter++;
 	}
@@ -201,28 +250,45 @@ sub mutationAssessor {
 }
 
 
+
 # MutationTaster
 sub mutationTaster {
 	$file_out = "$outDir/MutationTaster.temp";
 	open(OUT, "> $file_out");
-	open(IN, "cut -f 7,21,22 $file_in | tail -n+2 | sort -k1,1 |");
+	open(IN, "cut -f 7,21,22,48 $file_in | tail -n+2 | sort -k1,1 -k4,4 |");
 	$currentGene = "";
 	@currentScore = ();
+	$currentSample = "";
+	$bestScore = 0;
+	@samples = ();
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
 		$gene = $temp[0];
-		$score = $temp[1];		
+		$score = $temp[1];
 		$type = $temp[2];
+		$sample = $temp[3];
 		next if ($score eq ".");
 		next unless ($type eq "A" || $type eq "D");
 		if( $gene ne $currentGene && $currentGene ne ""){
-			print OUT $gene . "\t" . mean(@currentScore) . "\t". $type . "\n";
+			push(@currentScore, $bestScore);
+			push(@samples, $currentSample);
+			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
 			$currentGene = "";
-			@currentScore = ();				
-		} else{
-			$currentGene = $gene if ($currentGene eq "");
-			push(@currentScore, $score);
-		}		
+			@currentScore = ();		
+			$currentSample = "";
+			$bestScore = $score;
+			@samples = ();
+		} 
+		$currentSample = $sample if ($currentSample eq "");
+		$currentGene = $gene if ($currentGene eq "");
+		if( $sample ne $currentSample){
+			push(@currentScore, $bestScore);
+			push(@samples, $currentSample);
+			$currentSample = $sample;
+			$bestScore = 0;	
+		} 
+		$bestScore = $score if ($score > $bestScore);
+		
 	}
 	close(OUT);
 	close(IN);
@@ -237,7 +303,8 @@ sub mutationTaster {
 		$gene = $temp[0];
 		$score = $temp[1];
 		$type = $temp[2];
-		print OUT $gene . "\t" . "ALL" . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
+		$sample = $temp[3];
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
 		$reportedGenes{$gene} = "";
 		$counter++;
 	}
