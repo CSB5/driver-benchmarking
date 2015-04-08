@@ -214,7 +214,7 @@ sub mutationTaster {
 		$score = $temp[1];		
 		$type = $temp[2];
 		next if ($score eq ".");
-		next unless ($type eq "A" || $type eq "D"	# stringent mode);
+		next unless ($type eq "A" || $type eq "D");
 		if( $gene ne $currentGene && $currentGene ne ""){
 			print OUT $gene . "\t" . mean(@currentScore) . "\t". $type . "\n";
 			$currentGene = "";
