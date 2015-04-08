@@ -66,6 +66,7 @@ unless (-e $resultsDir){
 	system("mkdir -p $resultsDir");
 	system("cp $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/* $resultsDir") if(-e "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/");
 	system("ln -sfn $resultsDir $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST");
+	system("chmod g+w $resultsDir");
 }
 my $logsDir = "$config{'general.analysisDir'}/LOGS";
 system("mkdir -p $logsDir") unless (-e $logsDir);
@@ -224,7 +225,9 @@ if($config{'general.LJB'}){
 		system("ln -sfn $analysisDir $config{'general.analysisDir'}/LJB/LATEST");
 	}	
 	
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_LJB_parseOutput -e $logsDir/LJB_parseOutput.error.log -o $logsDir/LJB_parseOutput.run.log $config{'LJB.scriptsDir'}/parse_to_standard_output.pl --in $config{'LJB.annotation'} --outDir $resultsDir";
+	my $numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
+	chomp($numSamples);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_LJB_parseOutput -e $logsDir/LJB_parseOutput.error.log -o $logsDir/LJB_parseOutput.run.log $config{'LJB.scriptsDir'}/parse_to_standard_output.pl --in $config{'LJB.annotation'} --samples $numSamples --outDir $resultsDir";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
