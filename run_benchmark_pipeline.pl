@@ -331,7 +331,6 @@ sub generateConfig {
 		}
 		when( 'MutSigCV' ){
 			my $temp = $analysisDir;
-			$temp =~ s/projects/pnsg10_projects/g;
 			print OUT "outDir=$temp\n";
 			print OUT "matlab=$config{'MutSigCV.matlab'}\n";
 			if($config{'MutSigCV.flagFilter'}){
