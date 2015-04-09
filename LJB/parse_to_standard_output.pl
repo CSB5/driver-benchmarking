@@ -104,12 +104,16 @@ sub sift {
 		} 
 		$bestScore = $score if ($score < $bestScore);		
 	}
+	# Print last entry 
+	push(@currentScore, (1 - $bestScore));
+	push(@samples, $currentSample);	
+	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
 	close(OUT);
 	close(IN);
 		
 	$counter = 1;
 	$file_out = "$outDir/SIFT.result";
-	open(IN, "sort -k2,2nr $outDir/SIFT.temp |");
+	open(IN, "sort -k2,2gr $outDir/SIFT.temp |");
 	open(OUT, "> $file_out");
 	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 	while(<IN>){
@@ -168,12 +172,16 @@ sub polyphen2 {
 		} 
 		$bestScore = $score if ($score > $bestScore);		
 	}
+	# Print last entry
+	push(@currentScore, $bestScore);
+	push(@samples, $currentSample);
+	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
 	close(OUT);
 	close(IN);
 	
 	$counter = 1;
 	$file_out = "$outDir/PolyPhen2.result";
-	open(IN, "sort -k2,2nr $outDir/PolyPhen2.temp |");
+	open(IN, "sort -k2,2gr $outDir/PolyPhen2.temp |");
 	open(OUT, "> $file_out");
 	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 	while(<IN>){
@@ -234,12 +242,16 @@ sub mutationAssessor {
 		} 
 		$bestScore = $score if ($score > $bestScore);		
 	}
+	# Print last entry
+	push(@currentScore, $bestScore);
+	push(@samples, $currentSample);
+	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
 	close(OUT);
 	close(IN);
 	
 	$counter = 1;
 	$file_out = "$outDir/MutationAssessor.result";
-	open(IN, "sort -k2,2nr $outDir/MutationAssessor.temp | ");
+	open(IN, "sort -k2,2gr $outDir/MutationAssessor.temp | ");
 	open(OUT, "> $file_out");
 	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 	while(<IN>){
@@ -302,12 +314,16 @@ sub mutationTaster {
 		} 
 		$bestScore = $score if ($score > $bestScore);		
 	}
+	# Print last entry
+	push(@currentScore, $bestScore);
+	push(@samples, $currentSample);
+	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
 	close(OUT);
 	close(IN);
 	
 	$counter = 1;
 	$file_out = "$outDir/MutationTaster.result";
-	open(IN, "sort -k2,2nr $outDir/MutationTaster.temp |");
+	open(IN, "sort -k2,2gr $outDir/MutationTaster.temp |");
 	open(OUT, "> $file_out");
 	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 	while(<IN>){
