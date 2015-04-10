@@ -321,7 +321,7 @@ sub generateConfig {
 			print OUT "exp=$config{'oncoIMPACT.exp'}\n";
 			print OUT "snp=$config{'oncoIMPACT.snp'}\n";
 			print OUT "dataType=$config{'oncoIMPACT.dataType'}\n";
-			print OUT "databaseExport=$config{'oncoIMPACT.databaseExport'}\n";
+			#print OUT "databaseExport=$config{'oncoIMPACT.databaseExport'}\n";
 			continue;
 		}
 		when( 'DriverNet' ){
