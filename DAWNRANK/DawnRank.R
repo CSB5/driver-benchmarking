@@ -20,6 +20,7 @@ dawnRankScore<-DawnRank(adjMatrix=adjMatrix, expressionMatrix=expressionMatrix, 
 #dawnRankScore<-DawnRank((adjMatrix=adjMatrix, expressionMatrix=expressionMatrix, mutationMatrix=mutationMatrix, mu=3,goldStandard=NULL)
 
 #To get the output
+print("## Moving on to aggregate step.##\n")
 aggregateDawnRankScore<-condorcetRanking(scoreMatrix=dawnRankScore[[2]], mutationMatrix=mutationMatrix);
 write.table(aggregateDawnRankScore[[2]], file="driver_list.dat", sep="\t", row.names=T, col.names=T, quote=FALSE);
 
