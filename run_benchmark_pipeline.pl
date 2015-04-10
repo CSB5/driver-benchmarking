@@ -264,32 +264,33 @@ if($config{'general.OncodriveCLUST'}){
 	print "Job submitted.\n";
 }
 
-## DawnRank
-#if($config{'general.DawnRank'}){
-#	print "Running DawnRank. Please wait...";
-#	
-#	# Initialise folder
-#	$analysisDir = "$config{'general.analysisDir'}/DAWNRANK/$runID";
-#	system("mkdir -p $analysisDir") unless (-e $analysisDir);
-#	system("ln -sfn $analysisDir $config{'general.analysisDir'}/DAWNRANK/LATEST");
-#	
-#	# Generate config file
-#	generateConfig("DawnRank");
-#	
-#	# Run DriverNet
-#	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_DawnRank -e $logsDir/DawnRank.error.log -o $logsDir/DawnRank.run.log $config{'DawnRank.scriptsDir'}/run_DawnRank.pl --config $analysisDir/DawnRank_$runID.cfg";
-#	$command = $command . " --debug" if ($flag_debug);
-#	submit($command);
-#	
-#	# Parse DriverNet output to standard format
-#	$lastID = $queue[-1];
-#	chomp($lastID);
-#	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'DawnRank.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/driver_list.dat --out $resultsDir/DawnRank.result";
-#	$command = $command . " --debug" if ($flag_debug);
-#	submit($command);
-#	
-#	print "Job submitted.\n";
-#}
+
+# DawnRank
+if($config{'general.DawnRank'}){
+	print "Running DawnRank. Please wait...";
+	
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/DAWNRANK/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/DAWNRANK/LATEST");
+	
+	# Generate config file
+	generateConfig("DawnRank");
+	
+	# Run DawnRank
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_DawnRank -e $logsDir/DawnRank.error.log -o $logsDir/DawnRank.run.log $config{'DawnRank.scriptsDir'}/run_DawnRank.pl --config $analysisDir/DawnRank_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	# Parse DawnRank output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'DawnRank.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/driver_list.dat --out $resultsDir/DawnRank.result";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	print "Job submitted.\n";
+}
 
 
 close(TRACE);
