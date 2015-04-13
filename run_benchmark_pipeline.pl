@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.1.1";
+my $version = "v3.2.0";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -293,6 +293,34 @@ if($config{'general.DawnRank'}){
 }
 
 
+# NetBox
+if($config{'general.NetBox'}){
+	print "Running NetBox. Please wait...";
+	
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/NETBOX/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/NETBOX/LATEST");
+	
+	# Generate config file
+	generateConfig("NetBox");
+	
+	# Run NetBox
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_NetBox -e $logsDir/NetBox.error.log -o $logsDir/NetBox.run.log $config{'NetBox.scriptsDir'}/run_NetBox.pl --config $analysisDir/NetBox_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	# Parse NetBox output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_NetBox_parseOutput -e $logsDir/NetBox_parseOutput.error.log -o $logsDir/NetBox_parseOutput.run.log -hold_jid $lastID $config{'NetBox.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/modules.txt --mutation $config{'NetBox.mutationFrequency'} --outDir $resultsDir";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	print "Job submitted.\n";
+}
+
+
 close(TRACE);
 
 ### Sub-routines ###
@@ -369,7 +397,15 @@ sub generateConfig {
 			print OUT "annotation=$config{'OncodriveCLUST.annotation'}\n";
 			print OUT "transcript=$config{'OncodriveCLUST.transcript'}\n";
 			continue;
+		}		
+		when( 'NetBox' ){
+			print OUT "outDir=$analysisDir\n";
+			print OUT "gene=$config{'NetBox.gene'}\n";
+			print OUT "mutationFrequency=$config{'NetBox.mutationFrequency'}\n";
+			print OUT "maxMutation=$config{'NetBox.maxMutation'}\n";
+			continue;
 		}
+		
 		default{
 			close(OUT);
 		}
