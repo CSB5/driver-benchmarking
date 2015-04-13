@@ -79,7 +79,7 @@ close(OUT);
 
 open(OUT, ">$file_out");
 print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";
-open(FILE, "sort -k2,2 -gr $res_file.temp |");
+open(FILE, "sort -k2,2 -gr $file_out.temp |");
 my $rank = 1;
 while(<FILE>){
     chop $_;
