@@ -12,7 +12,7 @@ my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
 my ( $configFile, $flag_debug, $flag_help, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir );
-my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -v PATH,PERL5LIB,R_LIBS_SITE,MOSEKLM_LICENSE_FILE,AUGUSTUS_CONFIG_PATH,CLASSPATH";
+my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -v PATH,PERL5LIB,R_LIBS_SITE,MOSEKLM_LICENSE_FILE,AUGUSTUS_CONFIG_PATH,CLASSPATH,NETBOX_HOME";
 
 my $help_message = "
 This script runs various softwares for benchmarking.
@@ -74,7 +74,7 @@ print "done.\n";
 
 # Initializing variables
 print "Initializing variables. Please wait...";
-open( TRACE, "> $config{'general.analysisDir'}/LOGS/trace.log" );
+open( TRACE, ">> $config{'general.analysisDir'}/LOGS/trace.log" );
 @queue = ();
 my $runtime = "$config{'cluster.runtime'}:0:0";
 print "done.\n";
