@@ -74,7 +74,7 @@ print "done.\n";
 
 # Running DawnRank
 print "Running DawnRank. Please wait...";
-$command = "$config{'default.scriptsDir'}/DawnRank.R $config{'default.outDir'}/expression.dat $config{'default.outDir'}/mutation.dat $config{'default.outDir'}/network.dat";
+$command = "$config{'default.scriptsDir'}/DawnRank.R $config{'default.outDir'}/expression.dat $config{'default.outDir'}/mutation.dat $config{'default.outDir'}/network.dat $config{'default.outDir'}";
 print STDERR "[command] $command\n" if $flag_debug;
 system($command);
 print "done.\n";

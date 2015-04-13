@@ -3,6 +3,7 @@
 #argv[1]: expression matrix
 #argv[2]: mutation matrix
 #argv[3]: adjacency network matrix
+#argv[4]: outDir
 
 library(DawnRank);
 
@@ -22,7 +23,7 @@ dawnRankScore<-DawnRank(adjMatrix=adjMatrix, expressionMatrix=expressionMatrix, 
 #To get the output
 print("## Moving on to aggregate step.##\n")
 aggregateDawnRankScore<-condorcetRanking(scoreMatrix=dawnRankScore[[2]], mutationMatrix=mutationMatrix);
-write.table(aggregateDawnRankScore[[2]], file="driver_list.dat", sep="\t", row.names=T, col.names=T, quote=FALSE);
+write.table(aggregateDawnRankScore[[2]], file=paste(argv[4], "driver_list.dat", sep="/"), sep="\t", row.names=T, col.names=T, quote=FALSE);
 
 
 
