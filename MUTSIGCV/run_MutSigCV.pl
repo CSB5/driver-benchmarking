@@ -54,6 +54,6 @@ $command = "cd $config{'default.outDir'};";	# set working directory to outDir
 $command = $command . "run_MutSigCV.sh $config{'default.matlab'} $config{'default.maf'} $config{'default.coverage'} $config{'default.covariate'} $config{'default.prefix'} $config{'default.dict'} $config{'default.chr'}";	# run MutSigCV
 
 print STDERR "[MutSigCV] Command:$command\n" if $flag_debug;
-system("ssh -t aries \"$command\"");
-#system($command);
+#system("ssh -t aries \"$command\"");
+system($command);
 
