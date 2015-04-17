@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.2.0";
+my $version = "v3.2.1";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -104,7 +104,7 @@ if($config{'general.oncoIMPACT'}){
 	# Parse oncoIMPACT output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $logsDir/oncoIMPACT_parseOutput.error.log -o $logsDir/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'oncoIMPACT.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/ANALYSIS/GENE_LIST/ALTERATION.dat --out $resultsDir/oncoIMPACT.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $logsDir/oncoIMPACT_parseOutput.error.log -o $logsDir/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'oncoIMPACT.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/ANALYSIS/GENE_LIST/ALTERATION.dat --dir $analysisDir --out $resultsDir/oncoIMPACT.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
