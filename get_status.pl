@@ -49,7 +49,7 @@ print "done.\n";
 
 
 open( STATUS, "> $config{'general.analysisDir'}/LOGS/status.log" );
-my $date = strftime '%Y%m%d', localtime;
+my $date = localtime;
 print STATUS "Date: $date\n";
 
 # oncoIMPACT
