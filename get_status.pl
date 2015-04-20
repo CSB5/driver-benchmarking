@@ -21,7 +21,7 @@ Options:
 
 
 Version:
-	$version
+	1.0
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
