@@ -7,11 +7,11 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.2.1";
+my $version = "v3.3.0";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
-my ( $configFile, $flag_debug, $flag_help, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir );
+my ( $configFile, $flag_debug, $flag_help, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir);
 my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -v PATH,PERL5LIB,R_LIBS_SITE,MOSEKLM_LICENSE_FILE,AUGUSTUS_CONFIG_PATH,CLASSPATH,NETBOX_HOME";
 
 my $help_message = "
@@ -97,14 +97,14 @@ if($config{'general.oncoIMPACT'}){
 	generateConfig("oncoIMPACT");	
 	
 	# Run oncoIMPACT
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_oncoIMPACT -e $logsDir/oncoIMPACT.error.log -o $logsDir/oncoIMPACT.run.log $config{'oncoIMPACT.scriptsDir'}/oncoIMPACT.pl $analysisDir/oncoIMPACT_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_oncoIMPACT -e $logsDir/oncoIMPACT.error.log -o $logsDir/oncoIMPACT.run.log $config{'general.scriptsDir'}/ONCOIMPACT/oncoIMPACT.pl $analysisDir/oncoIMPACT_$runID.cfg";
 	$command = $command . " 1" if ($flag_debug);
 	submit($command);
 	
 	# Parse oncoIMPACT output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $logsDir/oncoIMPACT_parseOutput.error.log -o $logsDir/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'oncoIMPACT.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/ANALYSIS/GENE_LIST/ALTERATION.dat --dir $analysisDir --out $resultsDir/oncoIMPACT.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $logsDir/oncoIMPACT_parseOutput.error.log -o $logsDir/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $analysisDir/ANALYSIS/GENE_LIST/ALTERATION.dat --dir $analysisDir --out $resultsDir/oncoIMPACT.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -127,14 +127,14 @@ if($config{'general.DriverNet'}){
 	generateConfig("DriverNet");
 	
 	# Run DriverNet
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_DriverNet -e $logsDir/DriverNet.error.log -o $logsDir/DriverNet.run.log $config{'DriverNet.scriptsDir'}/run_driver_net.pl --config $analysisDir/DriverNet_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_DriverNet -e $logsDir/DriverNet.error.log -o $logsDir/DriverNet.run.log $config{'general.scriptsDir'}/DRIVERNET/run_driver_net.pl --config $analysisDir/DriverNet_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
 	# Parse DriverNet output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DriverNet_parseOutput -e $logsDir/DriverNet_parseOutput.error.log -o $logsDir/DriverNet_parseOutput.run.log -hold_jid $lastID $config{'DriverNet.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/res_driver_net.dat --out $resultsDir/DriverNet.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DriverNet_parseOutput -e $logsDir/DriverNet_parseOutput.error.log -o $logsDir/DriverNet_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/DRIVERNET/parse_to_standard_output.pl --in $analysisDir/res_driver_net.dat --out $resultsDir/DriverNet.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -158,7 +158,7 @@ if($config{'general.MutSigCV'}){
 	
 	# Filter TCGA MAF file
 	if($config{'MutSigCV.flagFilter'}){
-		$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_filterMAF -e $logsDir/MutSigCV_filterMAF.error.log -o $logsDir/MutSigCV_filterMAF.run.log $config{'MutSigCV.scriptsDir'}/filter_maf.pl --samples $config{'general.completeSamples'} --maf $config{'MutSigCV.maf'} --outDir $analysisDir";
+		$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_filterMAF -e $logsDir/MutSigCV_filterMAF.error.log -o $logsDir/MutSigCV_filterMAF.run.log $config{'general.scriptsDir'}/MUTSIGCV/filter_maf.pl --samples $config{'general.completeSamples'} --maf $config{'MutSigCV.maf'} --outDir $analysisDir";
 		$command = $command . " --debug" if ($flag_debug);
 		submit($command);
 		
@@ -169,14 +169,14 @@ if($config{'general.MutSigCV'}){
 	}
 	
 	# Run MutSigCV
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=23:0:0,h=n070 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV -e $logsDir/MutSigCV.error.log -o $logsDir/MutSigCV.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/run_MutSigCV.pl --config $analysisDir/MutSigCV_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=23:0:0,h=n070 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV -e $logsDir/MutSigCV.error.log -o $logsDir/MutSigCV.run.log -hold_jid $lastID $config{'general.scriptsDir'}/MUTSIGCV/run_MutSigCV.pl --config $analysisDir/MutSigCV_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
 	# Parse MutSigCV output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_parseOutput -e $logsDir/MutSigCV_parseOutput.error.log -o $logsDir/MutSigCV_parseOutput.run.log -hold_jid $lastID $config{'MutSigCV.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_parseOutput -e $logsDir/MutSigCV_parseOutput.error.log -o $logsDir/MutSigCV_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/MUTSIGCV/parse_to_standard_output.pl --in $analysisDir/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -199,14 +199,14 @@ if($config{'general.OncodriveFM'}){
 	generateConfig("OncodriveFM");
 	
 	# Run OncodriveFM
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_OncodriveFM -e $logsDir/OncodriveFM.error.log -o $logsDir/OncodriveFM.run.log $config{'OncodriveFM.scriptsDir'}/run_OncodriveFM.pl --config $analysisDir/OncodriveFM_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_OncodriveFM -e $logsDir/OncodriveFM.error.log -o $logsDir/OncodriveFM.run.log $config{'general.scriptsDir'}/ONCODRIVEFM/run_OncodriveFM.pl --config $analysisDir/OncodriveFM_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
 	# Parse OncodriveFM output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveFM_parseOutput -e $logsDir/OncodriveFM_parseOutput.error.log -o $logsDir/OncodriveFM_parseOutput.run.log -hold_jid $lastID $config{'OncodriveFM.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/OncodriveFM-genes.tsv --out $resultsDir/OncodriveFM.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveFM_parseOutput -e $logsDir/OncodriveFM_parseOutput.error.log -o $logsDir/OncodriveFM_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCODRIVEFM/parse_to_standard_output.pl --in $analysisDir/OncodriveFM-genes.tsv --out $resultsDir/OncodriveFM.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -227,7 +227,7 @@ if($config{'general.LJB'}){
 	
 	my $numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
 	chomp($numSamples);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_LJB_parseOutput -e $logsDir/LJB_parseOutput.error.log -o $logsDir/LJB_parseOutput.run.log $config{'LJB.scriptsDir'}/parse_to_standard_output.pl --in $config{'LJB.annotation'} --samples $numSamples --outDir $resultsDir";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_LJB_parseOutput -e $logsDir/LJB_parseOutput.error.log -o $logsDir/LJB_parseOutput.run.log $config{'general.scriptsDir'}/LJB/parse_to_standard_output.pl --in $config{'LJB.annotation'} --samples $numSamples --outDir $resultsDir";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -250,14 +250,14 @@ if($config{'general.OncodriveCLUST'}){
 	generateConfig("OncodriveCLUST");
 	
 	# Run OncodriveCLUST
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_OncodriveCLUST -e $logsDir/OncodriveCLUST.error.log -o $logsDir/OncodriveCLUST.run.log $config{'OncodriveCLUST.scriptsDir'}/run_OncodriveCLUST.pl --config $analysisDir/OncodriveCLUST_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_OncodriveCLUST -e $logsDir/OncodriveCLUST.error.log -o $logsDir/OncodriveCLUST.run.log $config{'general.scriptsDir'}/ONCODRIVECLUST/run_OncodriveCLUST.pl --config $analysisDir/OncodriveCLUST_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
 	# Parse OncodriveCLUST output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCLUST_parseOutput -e $logsDir/OncodriveCLUST_parseOutput.error.log -o $logsDir/OncodriveCLUST_parseOutput.run.log -hold_jid $lastID $config{'OncodriveCLUST.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/oncodriveclust-results.tsv --out $resultsDir/OncodriveCLUST.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCLUST_parseOutput -e $logsDir/OncodriveCLUST_parseOutput.error.log -o $logsDir/OncodriveCLUST_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCODRIVECLUST/parse_to_standard_output.pl --in $analysisDir/oncodriveclust-results.tsv --out $resultsDir/OncodriveCLUST.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -278,14 +278,14 @@ if($config{'general.DawnRank'}){
 	generateConfig("DawnRank");
 	
 	# Run DawnRank
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_DawnRank -e $logsDir/DawnRank.error.log -o $logsDir/DawnRank.run.log $config{'DawnRank.scriptsDir'}/run_DawnRank.pl --config $analysisDir/DawnRank_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_DawnRank -e $logsDir/DawnRank.error.log -o $logsDir/DawnRank.run.log $config{'general.scriptsDir'}/DAWNRANK/run_DawnRank.pl --config $analysisDir/DawnRank_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
 	# Parse DawnRank output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'DawnRank.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/driver_list.dat --out $resultsDir/DawnRank.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/DAWNRANK/parse_to_standard_output.pl --in $analysisDir/driver_list.dat --out $resultsDir/DawnRank.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -306,20 +306,24 @@ if($config{'general.NetBox'}){
 	generateConfig("NetBox");
 	
 	# Run NetBox
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_NetBox -e $logsDir/NetBox.error.log -o $logsDir/NetBox.run.log $config{'NetBox.scriptsDir'}/run_NetBox.pl --config $analysisDir/NetBox_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_NetBox -e $logsDir/NetBox.error.log -o $logsDir/NetBox.run.log $config{'general.scriptsDir'}/NETBOX/run_NetBox.pl --config $analysisDir/NetBox_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
 	# Parse NetBox output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_NetBox_parseOutput -e $logsDir/NetBox_parseOutput.error.log -o $logsDir/NetBox_parseOutput.run.log -hold_jid $lastID $config{'NetBox.scriptsDir'}/parse_to_standard_output.pl --in $analysisDir/modules.txt --mutation $config{'NetBox.mutationFrequency'} --outDir $resultsDir";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_NetBox_parseOutput -e $logsDir/NetBox_parseOutput.error.log -o $logsDir/NetBox_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/NETBOX/parse_to_standard_output.pl --in $analysisDir/modules.txt --mutation $config{'NetBox.mutationFrequency'} --outDir $resultsDir";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
 	print "Job submitted.\n";
 }
 
+
+
+## Generate status report
+$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_getStatus -e $logsDir/getStatus.error.log -o $logsDir/getStatus.run.log -hold_jid " . join (",", @queue) . " $config{'general.scriptsDir'}/get_status.pl --config $configFile";
 
 close(TRACE);
 
@@ -335,7 +339,6 @@ sub submit {
 	}
 }    # end sub submit
 
-
 sub generateConfig {
 	my $software = "@_";
 	open(OUT, "> $analysisDir/${software}_$runID.cfg");
@@ -344,7 +347,7 @@ sub generateConfig {
 	given($software){
 		when( 'oncoIMPACT'){
 			print OUT "outDir=$analysisDir\n";
-			print OUT "scriptDir=$config{'oncoIMPACT.scriptsDir'}\n";
+			print OUT "scriptDir=$config{'general.scriptsDir'}/ONCOIMPACT\n";
 			print OUT "numThreads=$config{'cluster.numThreads'}\n";
 			print OUT "cnv=$config{'oncoIMPACT.cnv'}\n";
 			print OUT "exp=$config{'oncoIMPACT.exp'}\n";
@@ -389,7 +392,7 @@ sub generateConfig {
 			print OUT "exp=$config{'DawnRank.exp'}\n";
 			print OUT "mut=$config{'DawnRank.mut'}\n";
 			print OUT "outDir=$analysisDir\n";
-			print OUT "scriptsDir=$config{'DawnRank.scriptsDir'}\n";
+			print OUT "scriptsDir=$config{'general.scriptsDir'}/DAWNRANK\n";
 			continue;
 		}		
 		when( 'OncodriveCLUST' ){
@@ -404,8 +407,7 @@ sub generateConfig {
 			print OUT "mutationFrequency=$config{'NetBox.mutationFrequency'}\n";
 			print OUT "maxMutation=$config{'NetBox.maxMutation'}\n";
 			continue;
-		}
-		
+		}		
 		default{
 			close(OUT);
 		}
