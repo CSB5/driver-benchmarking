@@ -55,65 +55,65 @@ print STATUS "Date: $date\n";
 # oncoIMPACT
 print STATUS "oncoIMPACT: ";
 if(-s "$config{'general.analysisDir'}/ONCOIMPACT/LATEST/ANALYSIS/GENE_LIST/ALTERATION.dat"){
-	print "OK\n";
+	print STATUS "OK\n";
 } else{
-	print "Failed\n";
+	print STATUS "Failed\n";
 }
 
 # DriverNet
 print STATUS "DriverNet: ";
 if(-s "$config{'general.analysisDir'}/DRIVERNET/LATEST/res_driver_net.dat"){
-	print "OK\n";
+	print STATUS "OK\n";
 } else{
-	print "Failed\n";
+	print STATUS "Failed\n";
 }
 
 #MutSigCV
 print STATUS "MutSigCV: ";
 if(-s "$config{'general.analysisDir'}/MUTSIGCV/LATEST/$config{'general.disease'}.sig_genes.txt"){
-	print "OK\n";
+	print STATUS "OK\n";
 } else{
-	print "Failed\n";
+	print STATUS "Failed\n";
 }
 
 # DawnRank
 print STATUS "DawnRank: ";
 if(-s "$config{'general.analysisDir'}/DAWNRANK/LATEST/driver_list.dat"){
-	print "OK\n";
+	print STATUS "OK\n";
 } else{
-	print "Failed\n";
+	print STATUS "Failed\n";
 }
 
 # OncodriveFM
 print STATUS "OncodriveFM: ";
 if(-s "$config{'general.analysisDir'}/ONCODRIVEFM/LATEST/OncodriveFM-genes.tsv"){
-	print "OK\n";
+	print STATUS "OK\n";
 } else{
-	print "Failed\n";
+	print STATUS "Failed\n";
 }
 
 # LJB
 print STATUS "LJB: ";
 if(-s "$config{'LJB.annotation'}"){
-	print "OK\n";
+	print STATUS "OK\n";
 } else{
-	print "Failed\n";
+	print STATUS "Failed\n";
 }
 
 # OncodriveCLUST
 print STATUS "OncodriveCLUST: ";
 if(-s "$config{'general.analysisDir'}/ONCODRIVECLUST/LATEST/oncodriveclust-results.tsv"){
-	print "OK\n";
+	print STATUS "OK\n";
 } else{
-	print "Failed\n";
+	print STATUS "Failed\n";
 }
 
 # NetBox
 print STATUS "NetBox: ";
 if(-s "$config{'general.analysisDir'}/NETBOX/LATEST/modules.txt"){
-	print "OK\n";
+	print STATUS "OK\n";
 } else{
-	print "Failed\n";
+	print STATUS "Failed\n";
 }
 
 close(STATUS);
