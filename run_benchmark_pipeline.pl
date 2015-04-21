@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.3.0";
+my $version = "v3.3.1";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -156,20 +156,8 @@ if($config{'general.MutSigCV'}){
 	# Generate config file
 	generateConfig("MutSigCV");
 	
-	# Filter TCGA MAF file
-	if($config{'MutSigCV.flagFilter'}){
-		$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_filterMAF -e $logsDir/MutSigCV_filterMAF.error.log -o $logsDir/MutSigCV_filterMAF.run.log $config{'general.scriptsDir'}/MUTSIGCV/filter_maf.pl --samples $config{'general.completeSamples'} --maf $config{'MutSigCV.maf'} --outDir $analysisDir";
-		$command = $command . " --debug" if ($flag_debug);
-		submit($command);
-		
-		$lastID = $queue[-1];
-		chomp($lastID);
-	} else{
-		$lastID = 99999;
-	}
-	
 	# Run MutSigCV
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=23:0:0,h=n070 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV -e $logsDir/MutSigCV.error.log -o $logsDir/MutSigCV.run.log -hold_jid $lastID $config{'general.scriptsDir'}/MUTSIGCV/run_MutSigCV.pl --config $analysisDir/MutSigCV_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=23:0:0,h=n070 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV -e $logsDir/MutSigCV.error.log -o $logsDir/MutSigCV.run.log $config{'general.scriptsDir'}/MUTSIGCV/run_MutSigCV.pl --config $analysisDir/MutSigCV_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -368,11 +356,7 @@ sub generateConfig {
 			my $temp = $analysisDir;
 			print OUT "outDir=$temp\n";
 			print OUT "matlab=$config{'MutSigCV.matlab'}\n";
-			if($config{'MutSigCV.flagFilter'}){
-				print OUT "maf=$temp/TCGA_somatic_mutations.filtered.maf\n";
-			} else {
-				print OUT "maf=$config{'MutSigCV.maf'}\n";
-			}
+			print OUT "maf=$config{'MutSigCV.maf'}\n";
 			print OUT "coverage=$config{'MutSigCV.coverage'}\n";
 			print OUT "covariate=$config{'MutSigCV.covariate'}\n";
 			print OUT "dict=$config{'MutSigCV.dict'}\n";
