@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.3.1";
+my $version = "v3.4.0";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -309,6 +309,34 @@ if($config{'general.NetBox'}){
 }
 
 
+# CHASM
+if($config{'general.CHASM'}){
+	print "Running CHASM. Please wait...";
+	
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/CHASM/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/CHASM/LATEST");
+	
+	# Generate config file
+	generateConfig("CHASM");
+	
+	# Run CHASM
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_CHASM -e $logsDir/CHASM.error.log -o $logsDir/CHASM.run.log $config{'general.scriptsDir'}/CHASM/run_CHASM.pl --config $analysisDir/CHASM_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	# Parse CHASM output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_CHASM_parseOutput -e $logsDir/CHASM_parseOutput.error.log -o $logsDir/CHASM_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $analysisDir --out $resultsDir/CHASM.result";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	print "Job submitted.\n";
+}
+
+
 
 ## Generate status report
 $command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_getStatus -e $logsDir/getStatus.error.log -o $logsDir/getStatus.run.log -hold_jid " . join (",", @queue) . " $config{'general.scriptsDir'}/get_status.pl --config $configFile";
@@ -391,7 +419,13 @@ sub generateConfig {
 			print OUT "mutationFrequency=$config{'NetBox.mutationFrequency'}\n";
 			print OUT "maxMutation=$config{'NetBox.maxMutation'}\n";
 			continue;
-		}		
+		}	
+		when( 'CHASM' ){
+			print OUT "outDir=$analysisDir\n";
+			print OUT "maf=$config{'CHASM.maf'}\n";
+			print OUT "classifier=$config{'CHASM.classifier'}\n";
+			continue;
+		}			
 		default{
 			close(OUT);
 		}
