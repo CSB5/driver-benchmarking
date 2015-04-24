@@ -91,7 +91,7 @@ while(<IN>){
 	$gene = $temp[0];
 	$score = $temp[14];
 	last if($score <= $score_threshold);
-	print OUT $gene . "\t" . join(",", @{$ht{$gene}}) . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
+	print OUT $gene . "\t" . join(";", @{$ht{$gene}}) . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
 	$counter++;
 }
 close(OUT);

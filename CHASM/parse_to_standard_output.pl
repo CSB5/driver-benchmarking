@@ -76,7 +76,7 @@ while(<FILE>){
 close(FILE);
 
 # Generate report
-open(FILE, "grep -v \"#\" Gene_Level_Analysis.Result.tsv | tail -n+2 | cut -f 1,4 | sort -k2,2g |");
+open(FILE, "grep -v \"#\" $inDir/Gene_Level_Analysis.Result.tsv | tail -n+2 | cut -f 1,4 | sort -k2,2g |");
 open(OUT, ">$file_out");
 print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 my $rank = 1;
@@ -89,7 +89,7 @@ while(<FILE>){
 		next;
 	}
 	next unless(exists $samples{$geneID});
-	print OUT $geneID. "\t" . join(",", @{$samples{$geneID}}) . "\t" . $rank . "\t" . $geneScore . "\t" . "fdr:" . join(",", @{$fdrs{$geneID}}) . "\n";
+	print OUT $geneID. "\t" . join(";", @{$samples{$geneID}}) . "\t" . $rank . "\t" . $geneScore . "\t" . "fdr:" . join(";", @{$fdrs{$geneID}}) . "\n";
 	$rank++;
 }
 close(OUT);
