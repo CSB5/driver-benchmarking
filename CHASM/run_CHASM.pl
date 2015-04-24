@@ -162,7 +162,6 @@ sub checkJob {
 sub getResults {
 	my $ff = File::Fetch->new(uri => $fileURL );
 	my $where = $ff->fetch( to => $config{'default.outDir'} ) or die $ff->error;
-	system("unzip $config{'default.outDir'}/$jobID.zip");
-	system("mv $config{'default.outDir'}/$jobID/* $config{'default.outDir'}");
-	system("rm -rf $config{'default.outDir'}/$jobID/ $config{'default.outDir'}/$jobID.zip");	
+	system("unzip -j -d $config{'default.outDir'} $config{'default.outDir'}/$jobID.zip");
+	system("rm -rf $config{'default.outDir'}/$jobID.zip");	
 } #end getResults
