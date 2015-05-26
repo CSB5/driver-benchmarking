@@ -64,7 +64,7 @@ my $analysisDir;
 my $resultsDir = "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/$runID";
 unless (-e $resultsDir){
 	system("mkdir -p $resultsDir");
-	system("cp $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/* $resultsDir") if(-e "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/");
+	system("cp -p $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/* $resultsDir") if(-e "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST/");
 	system("ln -sfn $resultsDir $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST");
 	system("chmod g+w $resultsDir");
 }
@@ -104,7 +104,7 @@ if($config{'general.oncoIMPACT'}){
 	# Parse oncoIMPACT output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $logsDir/oncoIMPACT_parseOutput.error.log -o $logsDir/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $analysisDir/ANALYSIS/GENE_LIST/ALTERATION.dat --dir $analysisDir --out $resultsDir/oncoIMPACT.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $logsDir/oncoIMPACT_parseOutput.error.log -o $logsDir/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $analysisDir --out $resultsDir/oncoIMPACT.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
