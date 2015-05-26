@@ -11,7 +11,7 @@ my $version = "v3.4.0";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
-my ( $configFile, $flag_debug, $flag_help, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir);
+my ( $configFile, $flag_debug, $flag_help, $flag_update, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir);
 my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -v PATH,PERL5LIB,R_LIBS_SITE,MOSEKLM_LICENSE_FILE,AUGUSTUS_CONFIG_PATH,CLASSPATH,NETBOX_HOME";
 
 my $help_message = "
@@ -24,6 +24,7 @@ Options:
 	--config = path to config file *
 	--debug: prints trace to STDERR
 	--sim: simulation mode - only prints commands to be executed to TRACE log
+	--update: update mode - only regenerates consolidated results
 	--help : prints this message 
 	
 * indicates required parameters	
@@ -44,6 +45,7 @@ if ( @ARGV == 0 ) {
 GetOptions(
 	"config=s" => \$configFile,
 	"debug"    => \$flag_debug,
+	"update"   => \$flag_update,
 	"sim"	   => \$flag_simulate,
 	"help"     => \$flag_help
 ) or die("Error in command line arguments.\n");
@@ -57,6 +59,51 @@ if ($flag_help) {
 print "Reading config file. Please wait...";
 Config::Simple->import_from( $configFile, \%config );
 print "done.\n";
+
+
+# Update only mode
+if($flag_update){
+	my $resultsDir = "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST";
+	my $logsDir = "$config{'general.analysisDir'}/LOGS/$runID";
+	
+	# OncoIMPACT
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $logsDir/oncoIMPACT_parseOutput.error.log -o $logsDir/oncoIMPACT_parseOutput.run.log $config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCOIMPACT/LATEST/ --out $resultsDir/oncoIMPACT.result";
+	submit($command);
+	
+	# DriverNet
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DriverNet_parseOutput -e $logsDir/DriverNet_parseOutput.error.log -o $logsDir/DriverNet_parseOutput.run.log $config{'general.scriptsDir'}/DRIVERNET/parse_to_standard_output.pl --in $config{'general.analysisDir'}/DRIVERNET/LATEST/res_driver_net.dat --out $resultsDir/DriverNet.result";
+	submit($command);
+	
+	# MutSigCV
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_parseOutput -e $logsDir/MutSigCV_parseOutput.error.log -o $logsDir/MutSigCV_parseOutput.run.log $config{'general.scriptsDir'}/MUTSIGCV/parse_to_standard_output.pl --in $config{'general.analysisDir'}/MUTSIGCV/LATEST/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
+	submit($command);
+	
+	# OncodriveFM
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveFM_parseOutput -e $logsDir/OncodriveFM_parseOutput.error.log -o $logsDir/OncodriveFM_parseOutput.run.log $config{'general.scriptsDir'}/ONCODRIVEFM/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVEFM/LATEST/OncodriveFM-genes.tsv --out $resultsDir/OncodriveFM.result";
+	submit($command);
+	
+	# LJB
+	my $numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_LJB_parseOutput -e $logsDir/LJB_parseOutput.error.log -o $logsDir/LJB_parseOutput.run.log $config{'general.scriptsDir'}/LJB/parse_to_standard_output.pl --in $config{'LJB.annotation'} --samples $numSamples --outDir $resultsDir";
+	submit($command);
+	
+	# OncodriveCLUST
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCLUST_parseOutput -e $logsDir/OncodriveCLUST_parseOutput.error.log -o $logsDir/OncodriveCLUST_parseOutput.run.log $config{'general.scriptsDir'}/ONCODRIVECLUST/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVECLUST/LATEST/oncodriveclust-results.tsv --out $resultsDir/OncodriveCLUST.result";
+	submit($command);
+	
+	# DawnRank
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log $config{'general.scriptsDir'}/DAWNRANK/parse_to_standard_output.pl --in $config{'general.analysisDir'}/DAWNRANK/LATEST/driver_list.dat --out $resultsDir/DawnRank.result";
+	submit($command);
+	
+	# NetBox
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_NetBox_parseOutput -e $logsDir/NetBox_parseOutput.error.log -o $logsDir/NetBox_parseOutput.run.log $config{'general.scriptsDir'}/NETBOX/parse_to_standard_output.pl --in $config{'general.analysisDir'}/NETBOX/LATEST/modules.txt --mutation $config{'NetBox.mutationFrequency'} --outDir $resultsDir";
+	submit($command);
+	
+	# CHASM
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_CHASM_parseOutput -e $logsDir/CHASM_parseOutput.error.log -o $logsDir/CHASM_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $config{'general.analysisDir'}/CHASM/LATEST --out $resultsDir/CHASM.result";
+	submit($command);
+}
+
 
 # Preparing output folders
 print "Preparing output folders. Please wait...";
