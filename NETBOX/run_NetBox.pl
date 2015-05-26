@@ -88,5 +88,7 @@ num_local_trials=0\n";
 close(OUT);
 
 #Run NetBox
-system("cd $config{'default.outDir'}; netAnalyze.py netbox1.props");
+$command = "$config{'default.scriptsDir'}/NetBox.sh $config{'default.outDir'}";
+print STDERR $command . "\n" if $flag_debug;
+system($command);
 

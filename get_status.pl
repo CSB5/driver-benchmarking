@@ -118,7 +118,7 @@ if(-s "$config{'general.analysisDir'}/NETBOX/LATEST/modules.txt"){
 
 # CHASM
 print STATUS "CHASM: ";
-if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant_Analysis.Result.tsv"){
+if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant.Result.tsv"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";

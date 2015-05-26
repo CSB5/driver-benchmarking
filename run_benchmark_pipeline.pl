@@ -68,13 +68,13 @@ unless (-e $resultsDir){
 	system("ln -sfn $resultsDir $config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST");
 	system("chmod g+w $resultsDir");
 }
-my $logsDir = "$config{'general.analysisDir'}/LOGS";
+my $logsDir = "$config{'general.analysisDir'}/LOGS/$runID";
 system("mkdir -p $logsDir") unless (-e $logsDir);
 print "done.\n";
 
 # Initializing variables
 print "Initializing variables. Please wait...";
-open( TRACE, ">> $config{'general.analysisDir'}/LOGS/trace.log" );
+open( TRACE, ">> $logsDir/trace.log" );
 @queue = ();
 my $runtime = "$config{'cluster.runtime'}:0:0";
 print "done.\n";
@@ -418,6 +418,7 @@ sub generateConfig {
 			print OUT "gene=$config{'NetBox.gene'}\n";
 			print OUT "mutationFrequency=$config{'NetBox.mutationFrequency'}\n";
 			print OUT "maxMutation=$config{'NetBox.maxMutation'}\n";
+			print OUT "scriptsDir=$config{'general.scriptsDir'}/NETBOX\n";
 			continue;
 		}	
 		when( 'CHASM' ){

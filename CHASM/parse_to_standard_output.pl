@@ -55,15 +55,15 @@ my (%samples, %fdrs, @temp, $geneID, $sampleID, $geneScore, $fdr);
 
 # Read variant level results to get samples
 my $threshold = 0.2;	# FDR used in CHASM paper
-open(FILE, "$inDir/Variant_Analysis.Result.tsv");
+open(FILE, "$inDir/Variant.Result.tsv");
 (%samples, %fdrs) = ();
 while(<FILE>){
-	next if( $_ =~ /^#/ || $_ =~ /^ID/ );
+	next if( $_ =~ /^#/ || $_ =~ /^Input line/ );
 	chomp(@temp = split(/\t/, $_));
-	$geneID = $temp[7];
-	$sampleID = $temp[6];
-	$fdr = $temp[21];
-	next if( $fdr eq " " || $fdr > $threshold );
+	$geneID = $temp[8];
+	$sampleID = $temp[7];
+	$fdr = $temp[12];	
+	next if( $fdr eq "" || $fdr > $threshold );
 	unless(exists $samples{$geneID}){
 		my @list = ();
 		my @list1 = ();
@@ -76,7 +76,7 @@ while(<FILE>){
 close(FILE);
 
 # Generate report
-open(FILE, "grep -v \"#\" $inDir/Gene_Level_Analysis.Result.tsv | tail -n+2 | cut -f 1,4 | sort -k2,2g |");
+open(FILE, "grep -v \"#\" $inDir/Gene_Level_Analysis.Result.tsv | tail -n+2 | cut -f 1,3 | sort -k2,2g |");
 open(OUT, ">$file_out");
 print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 my $rank = 1;

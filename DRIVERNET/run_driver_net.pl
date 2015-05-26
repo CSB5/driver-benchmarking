@@ -73,7 +73,7 @@ for($i = 0; $i < $config{'default.numProc'}; $i++){
     #Use an outlier matrix computed from the data
     else{
     print OUT "temp <- read.table(\"$config{'default.expData'}\", header=T, check.names=F)\n";
-	print OUT "patExpMatrix <- t(temp)\n";
+	print OUT "patExpMatrix <- log2(t(temp))\n";
 	print OUT "patOutMatrix <- getPatientOutlierMatrix (as.matrix(patExpMatrix), th=2)\n";
     }
 
@@ -118,7 +118,7 @@ if(index($config{'default.expData'}, ".rda") != -1){
 #Use an outlier matrix computed from the data
 else{
     print OUT "temp <- read.table(\"$config{'default.expData'}\", header=T, check.names=F)\n";
-	print OUT "patExpMatrix <- t(temp)\n";
+	print OUT "patExpMatrix <- log2(t(temp))\n";
     print OUT "patOutMatrix <- getPatientOutlierMatrix(as.matrix(patExpMatrix), th=2)\n";
     
 }
