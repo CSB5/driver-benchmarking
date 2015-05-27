@@ -54,7 +54,7 @@ print STATUS "Date: $date\n";
 
 # oncoIMPACT
 print STATUS "oncoIMPACT: ";
-if(-s "$config{'general.analysisDir'}/ONCOIMPACT/LATEST/ANALYSIS/GENE_LIST/ALTERATION.dat"){
+if(-s "$config{'general.analysisDir'}/ONCOIMPACT/LATEST/driver_list.txt"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";
