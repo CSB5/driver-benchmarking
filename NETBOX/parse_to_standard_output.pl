@@ -72,7 +72,7 @@ open(FILE, $file_in);
 while(<FILE>){
     @line = split(/\s+/, $_);
     $gene = $line[0];
-    print OUT $gene."\t".$gene_freq{$gene}."\n";
+    print OUT $gene."\t".$gene_freq{$gene}."\n" if(exists $gene_freq{$gene});
 }
 close(FILE);
 close(OUT);

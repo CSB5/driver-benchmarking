@@ -68,61 +68,10 @@ if($flag_update){
 	my $resultsDir = "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST";
 	my $logsDir = "$config{'general.analysisDir'}/LOGS/$runID";
 	
-	# OncoIMPACT
-	print "OncoIMPACT: ";
-	$command = "$config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCOIMPACT/LATEST/ --out $resultsDir/oncoIMPACT.result";
-	if(-s "$config{'general.analysisDir'}/ONCOIMPACT/LATEST/driver_list.txt"){
-		system($command);
-		print "Done\n";
-	} else{
-		print "Incomplete run!\n";
-	}
-	
-	# DriverNet
-	print "DriverNet: ";
-	$command = "$config{'general.scriptsDir'}/DRIVERNET/parse_to_standard_output.pl --in $config{'general.analysisDir'}/DRIVERNET/LATEST/res_driver_net.dat --out $resultsDir/DriverNet.result";
-	if(-s "$config{'general.analysisDir'}/DRIVERNET/LATEST/res_driver_net.dat"){
-		system($command);
-		print "Done\n";
-	} else{
-		print "Incomplete run!\n";
-	}
-	
-	# MutSigCV
-	print "MutSigCV: ";
-	$command = "$config{'general.scriptsDir'}/MUTSIGCV/parse_to_standard_output.pl --in $config{'general.analysisDir'}/MUTSIGCV/LATEST/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
-	if(-s "$config{'general.analysisDir'}/MUTSIGCV/LATEST/$config{'general.disease'}.sig_genes.txt"){
-		system($command);
-		print "Done\n";
-	} else{
-		print "Incomplete run!\n";
-	}
-	
-	# OncodriveFM
-	print "OncodriveFM: ";
-	$command = "$config{'general.scriptsDir'}/ONCODRIVEFM/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVEFM/LATEST/OncodriveFM-genes.tsv --out $resultsDir/OncodriveFM.result";
-	if(-s "$config{'general.analysisDir'}/ONCODRIVEFM/LATEST/OncodriveFM-genes.tsv"){
-		system($command);
-		print "Done\n";
-	} else{
-		print "Incomplete run!\n";
-	}
-		
-	# LJB
-	print "LJB: ";
-	my $numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
-	$command = "$config{'general.scriptsDir'}/LJB/parse_to_standard_output.pl --in $config{'LJB.annotation'} --samples $numSamples --outDir $resultsDir";
-	if(-s "$config{'LJB.annotation'}"){
-		system($command);
-		print "Done\n";
-	} else{
-		print "Incomplete run!\n";
-	}
-	
-	# OncodriveCLUST
-	print "OncodriveCLUST: ";
-	$command = "$config{'general.scriptsDir'}/ONCODRIVECLUST/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVECLUST/LATEST/oncodriveclust-results.tsv --out $resultsDir/OncodriveCLUST.result";
-	if(-s "$config{'general.analysisDir'}/ONCODRIVECLUST/LATEST/oncodriveclust-results.tsv"){
+	# CHASM
+	print "CHASM: ";
+	$command = "$config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $config{'general.analysisDir'}/CHASM/LATEST --out $resultsDir/CHASM.result";
+	if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant.Result.tsv"){
 		system($command);
 		print "Done\n";
 	} else{
@@ -139,6 +88,38 @@ if($flag_update){
 		print "Incomplete run!\n";
 	}
 	
+	# DriverNet
+	print "DriverNet: ";
+	$command = "$config{'general.scriptsDir'}/DRIVERNET/parse_to_standard_output.pl --in $config{'general.analysisDir'}/DRIVERNET/LATEST/res_driver_net.dat --out $resultsDir/DriverNet.result";
+	if(-s "$config{'general.analysisDir'}/DRIVERNET/LATEST/res_driver_net.dat"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+	
+	# LJB
+	print "LJB: ";
+	my $numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
+	chomp($numSamples);
+	$command = "$config{'general.scriptsDir'}/LJB/parse_to_standard_output.pl --in $config{'LJB.annotation'} --samples $numSamples --outDir $resultsDir";
+	if(-s "$config{'LJB.annotation'}"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+	
+	# MutSigCV
+	print "MutSigCV: ";
+	$command = "$config{'general.scriptsDir'}/MUTSIGCV/parse_to_standard_output.pl --in $config{'general.analysisDir'}/MUTSIGCV/LATEST/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
+	if(-s "$config{'general.analysisDir'}/MUTSIGCV/LATEST/$config{'general.disease'}.sig_genes.txt"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+	
 	# NetBox
 	print "NetBox: ";
 	$command = "$config{'general.scriptsDir'}/NETBOX/parse_to_standard_output.pl --in $config{'general.analysisDir'}/NETBOX/LATEST/modules.txt --mutation $config{'NetBox.mutationFrequency'} --outDir $resultsDir";
@@ -149,15 +130,37 @@ if($flag_update){
 		print "Incomplete run!\n";
 	}
 	
-	# CHASM
-	print "CHASM: ";
-	$command = "$config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $config{'general.analysisDir'}/CHASM/LATEST --out $resultsDir/CHASM.result";
-	if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant.Result.tsv"){
+	# OncodriveCLUST
+	print "OncodriveCLUST: ";
+	$command = "$config{'general.scriptsDir'}/ONCODRIVECLUST/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVECLUST/LATEST/oncodriveclust-results.tsv --out $resultsDir/OncodriveCLUST.result";
+	if(-s "$config{'general.analysisDir'}/ONCODRIVECLUST/LATEST/oncodriveclust-results.tsv"){
 		system($command);
 		print "Done\n";
 	} else{
 		print "Incomplete run!\n";
 	}
+	
+	# OncodriveFM
+	print "OncodriveFM: ";
+	$command = "$config{'general.scriptsDir'}/ONCODRIVEFM/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVEFM/LATEST/OncodriveFM-genes.tsv --out $resultsDir/OncodriveFM.result";
+	if(-s "$config{'general.analysisDir'}/ONCODRIVEFM/LATEST/OncodriveFM-genes.tsv"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+		
+	# OncoIMPACT
+	print "OncoIMPACT: ";
+	$command = "$config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCOIMPACT/LATEST/ --out $resultsDir/oncoIMPACT.result";
+	if(-s "$config{'general.analysisDir'}/ONCOIMPACT/LATEST/driver_list.txt"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+	
+	exit 0;
 }
 
 

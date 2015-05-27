@@ -52,25 +52,9 @@ open( STATUS, "> $config{'general.analysisDir'}/LOGS/status.log" );
 my $date = localtime;
 print STATUS "Date: $date\n";
 
-# oncoIMPACT
-print STATUS "oncoIMPACT: ";
-if(-s "$config{'general.analysisDir'}/ONCOIMPACT/LATEST/driver_list.txt"){
-	print STATUS "OK\n";
-} else{
-	print STATUS "Failed\n";
-}
-
-# DriverNet
-print STATUS "DriverNet: ";
-if(-s "$config{'general.analysisDir'}/DRIVERNET/LATEST/res_driver_net.dat"){
-	print STATUS "OK\n";
-} else{
-	print STATUS "Failed\n";
-}
-
-#MutSigCV
-print STATUS "MutSigCV: ";
-if(-s "$config{'general.analysisDir'}/MUTSIGCV/LATEST/$config{'general.disease'}.sig_genes.txt"){
+# CHASM
+print STATUS "CHASM: ";
+if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant.Result.tsv"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";
@@ -84,9 +68,9 @@ if(-s "$config{'general.analysisDir'}/DAWNRANK/LATEST/driver_list.dat"){
 	print STATUS "Failed\n";
 }
 
-# OncodriveFM
-print STATUS "OncodriveFM: ";
-if(-s "$config{'general.analysisDir'}/ONCODRIVEFM/LATEST/OncodriveFM-genes.tsv"){
+# DriverNet
+print STATUS "DriverNet: ";
+if(-s "$config{'general.analysisDir'}/DRIVERNET/LATEST/res_driver_net.dat"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";
@@ -100,9 +84,9 @@ if(-s "$config{'LJB.annotation'}"){
 	print STATUS "Failed\n";
 }
 
-# OncodriveCLUST
-print STATUS "OncodriveCLUST: ";
-if(-s "$config{'general.analysisDir'}/ONCODRIVECLUST/LATEST/oncodriveclust-results.tsv"){
+# MutSigCV
+print STATUS "MutSigCV: ";
+if(-s "$config{'general.analysisDir'}/MUTSIGCV/LATEST/$config{'general.disease'}.sig_genes.txt"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";
@@ -116,9 +100,25 @@ if(-s "$config{'general.analysisDir'}/NETBOX/LATEST/modules.txt"){
 	print STATUS "Failed\n";
 }
 
-# CHASM
-print STATUS "CHASM: ";
-if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant.Result.tsv"){
+# OncodriveCLUST
+print STATUS "OncodriveCLUST: ";
+if(-s "$config{'general.analysisDir'}/ONCODRIVECLUST/LATEST/oncodriveclust-results.tsv"){
+	print STATUS "OK\n";
+} else{
+	print STATUS "Failed\n";
+}
+
+# OncodriveFM
+print STATUS "OncodriveFM: ";
+if(-s "$config{'general.analysisDir'}/ONCODRIVEFM/LATEST/OncodriveFM-genes.tsv"){
+	print STATUS "OK\n";
+} else{
+	print STATUS "Failed\n";
+}
+
+# oncoIMPACT
+print STATUS "oncoIMPACT: ";
+if(-s "$config{'general.analysisDir'}/ONCOIMPACT/LATEST/driver_list.txt"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";

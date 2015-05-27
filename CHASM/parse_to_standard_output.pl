@@ -58,7 +58,7 @@ my $threshold = 0.2;	# FDR used in CHASM paper
 open(FILE, "$inDir/Variant.Result.tsv");
 (%samples, %fdrs) = ();
 while(<FILE>){
-	next if( $_ =~ /^#/ || $_ =~ /^Input line/ );
+	next if( $_ =~ /^#/ || $_ =~ /^Input line/ || $_ eq "\n");
 	chomp(@temp = split(/\t/, $_));
 	$geneID = $temp[8];
 	$sampleID = $temp[7];
