@@ -83,10 +83,11 @@ $counter = 1;
 open(IN, "$dir/driver_list.txt");
 open(OUT, "> $file_out");
 print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
+<IN>;	# skip header
 while(<IN>){
 	chomp(@temp = split(/\t/, $_));
 	$gene = $temp[0];
-	$score = $temp[14];
+	$score = $temp[7];
 	last if($score <= $score_threshold);
 	print OUT $gene . "\t" . join(";", @{$ht{$gene}}) . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
 	$counter++;

@@ -67,7 +67,7 @@ mutationTaster();
 sub sift {	
 	$threshold = 0.05;
 	$file_out = "$outDir/SIFT.temp";
-	open(OUT, "> $file_out");
+	open(OUT, ">$file_out");
 	open(IN, "cut -f 7,13,48 $file_in | tail -n+2 | sort -k1,1 -k3,3 |");
 	$currentGene = "";
 	@currentScore = ();
@@ -114,7 +114,7 @@ sub sift {
 	$counter = 1;
 	$file_out = "$outDir/SIFT.result";
 	open(IN, "sort -k2,2gr $outDir/SIFT.temp |");
-	open(OUT, "> $file_out");
+	open(OUT, ">$file_out");
 	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
@@ -135,7 +135,7 @@ sub polyphen2 {
 	$threshold = 0.909; # stringent mode
 	# $threshold = 0.446; # relaxed mode
 	$file_out = "$outDir/PolyPhen2.temp";
-	open(OUT, "> $file_out");
+	open(OUT, ">$file_out");
 	open(IN, "cut -f 7,17,48 $file_in | tail -n+2 | sort -k1,1 -k3,3 |");
 	$currentGene = "";
 	@currentScore = ();
@@ -182,7 +182,7 @@ sub polyphen2 {
 	$counter = 1;
 	$file_out = "$outDir/PolyPhen2.result";
 	open(IN, "sort -k2,2gr $outDir/PolyPhen2.temp |");
-	open(OUT, "> $file_out");
+	open(OUT, ">$file_out");
 	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
@@ -201,7 +201,7 @@ sub polyphen2 {
 # MutationAssessor
 sub mutationAssessor {
 	$file_out = "$outDir/MutationAssessor.temp";
-	open(OUT, "> $file_out");
+	open(OUT, ">$file_out");
 	open(IN, "cut -f 7,23,24,48 $file_in | tail -n+2 | sort -k1,1 -k4,4 |");
 	$currentGene = "";
 	@currentScore = ();
@@ -252,7 +252,7 @@ sub mutationAssessor {
 	$counter = 1;
 	$file_out = "$outDir/MutationAssessor.result";
 	open(IN, "sort -k2,2gr $outDir/MutationAssessor.temp | ");
-	open(OUT, "> $file_out");
+	open(OUT, ">$file_out");
 	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
@@ -275,7 +275,7 @@ sub mutationAssessor {
 # MutationTaster
 sub mutationTaster {
 	$file_out = "$outDir/MutationTaster.temp";
-	open(OUT, "> $file_out");
+	open(OUT, ">$file_out");
 	open(IN, "cut -f 7,21,22,48 $file_in | tail -n+2 | sort -k1,1 -k4,4 |");
 	$currentGene = "";
 	@currentScore = ();
@@ -324,7 +324,7 @@ sub mutationTaster {
 	$counter = 1;
 	$file_out = "$outDir/MutationTaster.result";
 	open(IN, "sort -k2,2gr $outDir/MutationTaster.temp |");
-	open(OUT, "> $file_out");
+	open(OUT, ">$file_out");
 	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
