@@ -124,4 +124,13 @@ if(-s "$config{'general.analysisDir'}/ONCOIMPACT/LATEST/driver_list.txt"){
 	print STATUS "Failed\n";
 }
 
+# oncoIMPACT-v1
+print STATUS "oncoIMPACT-v1: ";
+if(-s "$config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST/driver_list.txt"){
+	print STATUS "OK\n";
+} else{
+	print STATUS "Failed\n";
+}
+
+
 close(STATUS);

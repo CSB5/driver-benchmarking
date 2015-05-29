@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.4.0";
+my $version = "v3.5.0";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -154,6 +154,16 @@ if($flag_update){
 	print "OncoIMPACT: ";
 	$command = "$config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCOIMPACT/LATEST/ --out $resultsDir/oncoIMPACT.result";
 	if(-s "$config{'general.analysisDir'}/ONCOIMPACT/LATEST/driver_list.txt"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+	
+	# OncoIMPACT-v1
+	print "OncoIMPACT-v1: ";
+	$command = "$config{'general.scriptsDir'}/ONCOIMPACT-V1/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST/ --out $resultsDir/oncoIMPACT-v1.result";
+	if(-s "$config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST/driver_list.txt"){
 		system($command);
 		print "Done\n";
 	} else{
@@ -443,6 +453,38 @@ if($config{'general.CHASM'}){
 }
 
 
+# oncoIMPACT-v1
+if($config{'general.oncoIMPACT-v1'}){	
+	print "Running oncoIMPACT-v1. Please wait...";
+
+	# Initialise folder		
+	$analysisDir = "$config{'general.analysisDir'}/ONCOIMPACT-V1/$runID";
+	unless (-e $analysisDir){
+		system("mkdir -p $analysisDir");
+		system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST");
+	}
+	
+	# Generate config file
+	generateConfig("oncoIMPACT-v1");	
+	
+	# Run oncoIMPACT
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_oncoIMPACT-v1 -e $logsDir/oncoIMPACT-v1.error.log -o $logsDir/oncoIMPACT-v1.run.log -b y $config{'general.scriptsDir'}/ONCOIMPACT-V1/oncoIMPACT.exe --database $analysisDir/oncoIMPACT-v1_$runID.cfg";
+	$command = $command . " 1" if ($flag_debug);
+	submit($command);
+	
+	# Parse oncoIMPACT output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT-v1_parseOutput -e $logsDir/oncoIMPACT-v1_parseOutput.error.log -o $logsDir/oncoIMPACT-v1_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCOIMPACT-V1/parse_to_standard_output.pl --in $analysisDir --out $resultsDir/oncoIMPACT-v1.result";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	print "Job submitted.\n";
+}
+
+
+
+
 
 ## Generate status report
 $command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_getStatus -e $logsDir/getStatus.error.log -o $logsDir/getStatus.run.log -hold_jid " . join (",", @queue) . " $config{'general.scriptsDir'}/get_status.pl --config $configFile";
@@ -531,6 +573,17 @@ sub generateConfig {
 			print OUT "outDir=$analysisDir\n";
 			print OUT "maf=$config{'CHASM.maf'}\n";
 			print OUT "classifier=$config{'CHASM.classifier'}\n";
+			continue;
+		}
+		when( 'oncoIMPACT-v1'){
+			print OUT "outDir=$analysisDir\n";
+			print OUT "scriptDir=$config{'general.scriptsDir'}/ONCOIMPACT-V1\n";
+			print OUT "numThreads=$config{'cluster.numThreads'}\n";
+			print OUT "cnv=$config{'oncoIMPACT.cnv'}\n";
+			print OUT "exp=$config{'oncoIMPACT.exp'}\n";
+			print OUT "snp=$config{'oncoIMPACT.snp'}\n";
+			print OUT "dataType=$config{'oncoIMPACT.dataType'}\n";
+			#print OUT "databaseExport=$config{'oncoIMPACT.databaseExport'}\n";
 			continue;
 		}			
 		default{
