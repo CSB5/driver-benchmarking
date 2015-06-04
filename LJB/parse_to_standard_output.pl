@@ -57,10 +57,20 @@ if ($flag_debug) {
 
 my ($counter, @temp, $gene, $score, $type, $threshold, %reportedGenes, $currentGene, @currentScore, $currentSample, @samples, $sample, $bestScore);
 
-sift();
-polyphen2();
-mutationAssessor();
-mutationTaster();
+if (index($file_in, "hg19") != -1) {
+	# hg19
+	sift("7,13,48");
+	polyphen2("7,17,48");
+	mutationAssessor("7,23,24,48");
+	mutationTaster("7,21,22,48");    
+} else{
+	# hg18
+	sift("7,11,46");
+	polyphen2("7,15,46");
+	mutationAssessor("7,21,22,46");
+	mutationTaster("7,19,20,46");  
+}
+
 
 ######## sub routines ########
 # SIFT
@@ -68,7 +78,7 @@ sub sift {
 	$threshold = 0.05;
 	$file_out = "$outDir/SIFT.temp";
 	open(OUT, ">$file_out");
-	open(IN, "cut -f 7,13,48 $file_in | tail -n+2 | sort -k1,1 -k3,3 |");
+	open(IN, "cut -f $_[0] $file_in | tail -n+2 | sort -k1,1 -k3,3 |");
 	$currentGene = "";
 	@currentScore = ();
 	$currentSample = "";
@@ -136,7 +146,7 @@ sub polyphen2 {
 	# $threshold = 0.446; # relaxed mode
 	$file_out = "$outDir/PolyPhen2.temp";
 	open(OUT, ">$file_out");
-	open(IN, "cut -f 7,17,48 $file_in | tail -n+2 | sort -k1,1 -k3,3 |");
+	open(IN, "cut -f $_[0] $file_in | tail -n+2 | sort -k1,1 -k3,3 |");
 	$currentGene = "";
 	@currentScore = ();
 	$currentSample = "";
@@ -202,7 +212,7 @@ sub polyphen2 {
 sub mutationAssessor {
 	$file_out = "$outDir/MutationAssessor.temp";
 	open(OUT, ">$file_out");
-	open(IN, "cut -f 7,23,24,48 $file_in | tail -n+2 | sort -k1,1 -k4,4 |");
+	open(IN, "cut -f $_[0] $file_in | tail -n+2 | sort -k1,1 -k4,4 |");
 	$currentGene = "";
 	@currentScore = ();
 	$currentSample = "";
@@ -276,7 +286,7 @@ sub mutationAssessor {
 sub mutationTaster {
 	$file_out = "$outDir/MutationTaster.temp";
 	open(OUT, ">$file_out");
-	open(IN, "cut -f 7,21,22,48 $file_in | tail -n+2 | sort -k1,1 -k4,4 |");
+	open(IN, "cut -f $_[0] $file_in | tail -n+2 | sort -k1,1 -k4,4 |");
 	$currentGene = "";
 	@currentScore = ();
 	$currentSample = "";
