@@ -469,7 +469,6 @@ if($config{'general.oncoIMPACT-v1'}){
 	
 	# Run oncoIMPACT
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_oncoIMPACT-v1 -e $logsDir/oncoIMPACT-v1.error.log -o $logsDir/oncoIMPACT-v1.run.log -b y $config{'general.scriptsDir'}/ONCOIMPACT-V1/oncoIMPACT.exe --database $analysisDir/oncoIMPACT-v1_$runID.cfg";
-	$command = $command . " 1" if ($flag_debug);
 	submit($command);
 	
 	# Parse oncoIMPACT output to standard format
@@ -577,13 +576,13 @@ sub generateConfig {
 		}
 		when( 'oncoIMPACT-v1'){
 			print OUT "outDir=$analysisDir\n";
-			print OUT "scriptDir=$config{'general.scriptsDir'}/ONCOIMPACT-V1\n";
 			print OUT "numThreads=$config{'cluster.numThreads'}\n";
-			print OUT "cnv=$config{'oncoIMPACT.cnv'}\n";
-			print OUT "exp=$config{'oncoIMPACT.exp'}\n";
-			print OUT "snp=$config{'oncoIMPACT.snp'}\n";
-			print OUT "dataType=$config{'oncoIMPACT.dataType'}\n";
-			#print OUT "databaseExport=$config{'oncoIMPACT.databaseExport'}\n";
+			print OUT "cnv=$config{'oncoIMPACT-v1.cnv'}\n";
+			print OUT "exp=$config{'oncoIMPACT-v1.exp'}\n";
+			print OUT "snp=$config{'oncoIMPACT-v1.snp'}\n";
+			print OUT "network=$config{'oncoIMPACT-v1.network'}\n";
+			print OUT "benchmarkGeneList=$config{'oncoIMPACT-v1.benchmarkGeneList'}\n";
+			print OUT "dataType=$config{'oncoIMPACT-v1.dataType'}\n";
 			continue;
 		}			
 		default{

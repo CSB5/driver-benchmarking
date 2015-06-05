@@ -56,14 +56,14 @@ if ($flag_debug) {
 my ($counter, @temp, $gene, $score, %ht, @samples, $sampleID);
 
 # Read OncoIMPACT output directory to get list of samples
-opendir( DIR, "$dir/sample_driver_list" );
-@samples = grep{!/^\./} readdir(DIR);
-close(DIR);
-
+opendir( DIR, "$dir/stringent/samples" );
 # Populate hash with mutation information
-foreach my $sample (@samples){
-	$sampleID = basename($sample, ".txt");
-	open(FILE, "$dir/sample_driver_list/$sample") or die ("File not found: $dir/sample_driver_list/$sample");
+while (my $file = readdir(DIR)) {
+	next unless (-f "$dir/stringent/samples/$file");
+	next unless ($file =~ m/\.tsv$/);
+	
+	$sampleID = basename($file, ".tsv");
+	open(FILE, "$dir/stringent/samples/$file") or die ("File not found: $dir/stringent/samples/$file");
 	<FILE>; #skip header
 	while(<FILE>){		
 		chomp(@temp = split(/\t/, $_));
@@ -76,6 +76,7 @@ foreach my $sample (@samples){
 	}
 	close(FILE);
 }
+close(DIR);
 
 # Generate results
 my $score_threshold = 0;
