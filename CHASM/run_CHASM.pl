@@ -114,7 +114,7 @@ sub submitJob {
 								chasmclassifier => $config{'default.classifier'},
 								email => $email,
 								functionalannotation => 'off',
-								hg18 => 'off',
+								hg18 => $config{'default.hg18'},
 								inputfile => ["$inputFile"],
 								mupitinput => 'off',
 								tsvreport => 'on'

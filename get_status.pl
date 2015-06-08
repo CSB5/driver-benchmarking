@@ -54,7 +54,7 @@ print STATUS "Date: $date\n";
 
 # CHASM
 print STATUS "CHASM: ";
-if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant.Result.tsv"){
+if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant_Additional_Details.Result.tsv"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";

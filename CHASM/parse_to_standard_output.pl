@@ -51,45 +51,40 @@ if ($flag_debug) {
 	print STDERR "OUTPUT: $file_out\n";	
 }
 
-my (%samples, %fdrs, @temp, $geneID, $sampleID, $geneScore, $fdr);
+my (%samples, %fdrs, %bestScore, @temp, $geneID, $sampleID, $geneScore, $fdr);
 
 # Read variant level results to get samples
 my $threshold = 0.2;	# FDR used in CHASM paper
-open(FILE, "$inDir/Variant.Result.tsv");
-(%samples, %fdrs) = ();
+open(FILE, "$inDir/Variant_Additional_Details.Result.tsv");
+(%samples, %fdrs, %bestScore) = ();
 while(<FILE>){
 	next if( $_ =~ /^#/ || $_ =~ /^Input line/ || $_ eq "\n");
 	chomp(@temp = split(/\t/, $_));
 	$geneID = $temp[8];
 	$sampleID = $temp[7];
-	$fdr = $temp[12];	
+	$geneScore = $temp[15];
+	$fdr = $temp[17];	
 	next if( $fdr eq "" || $fdr > $threshold );
 	unless(exists $samples{$geneID}){
 		my @list = ();
-		my @list1 = ();
 		$samples{$geneID} = \@list;
-		$fdrs{$geneID} = \@list1;
-	}
+		$fdrs{$geneID} = $fdr;
+		$bestScore{$geneID} = $geneScore;
+	} 
 	push(@{$samples{$geneID}}, $sampleID);
-	push(@{$fdrs{$geneID}}, $fdr);
+	if($geneScore > $bestScore{$geneID}){
+		$bestScore{$geneID} = $geneScore; 
+		$fdrs{$geneID} = $fdr;		
+	}
 }
 close(FILE);
 
 # Generate report
-open(FILE, "grep -v \"#\" $inDir/Gene_Level_Analysis.Result.tsv | tail -n+2 | cut -f 1,3 | sort -k2,2g |");
 open(OUT, ">$file_out");
 print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 my $rank = 1;
-while(<FILE>){
-	chomp(@temp = split(/\t/, $_));
-	$geneID = $temp[0];
-	$geneScore = $temp[1];
-	if(exists $samples{$geneID} && $geneScore eq " "){
-		print STDERR "ERROR: $geneID has significant pVal but no gene score!\n";
-		next;
-	}
-	next unless(exists $samples{$geneID});
-	print OUT $geneID. "\t" . join(";", @{$samples{$geneID}}) . "\t" . $rank . "\t" . $geneScore . "\t" . "fdr:" . join(";", @{$fdrs{$geneID}}) . "\n";
+foreach $geneID (sort { $bestScore{$b} <=> $bestScore{$a} or $a cmp $b } keys %bestScore) {
+	print OUT $geneID. "\t" . join(";", @{$samples{$geneID}}) . "\t" . $rank . "\t" . $bestScore{$geneID} . "\t" . "fdr:" . $fdrs{$geneID} . "\n";
 	$rank++;
 }
 close(OUT);
