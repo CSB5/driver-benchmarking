@@ -71,7 +71,7 @@ if($flag_update){
 	# CHASM
 	print "CHASM: ";
 	$command = "$config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $config{'general.analysisDir'}/CHASM/LATEST --out $resultsDir/CHASM.result";
-	if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant.Result.tsv"){
+	if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant_Additional_Details.Result.tsv"){
 		system($command);
 		print "Done\n";
 	} else{
@@ -571,6 +571,7 @@ sub generateConfig {
 		when( 'CHASM' ){
 			print OUT "outDir=$analysisDir\n";
 			print OUT "maf=$config{'CHASM.maf'}\n";
+			print OUT "hg18=$config{'CHASM.hg18'}\n";
 			print OUT "classifier=$config{'CHASM.classifier'}\n";
 			continue;
 		}
