@@ -23,7 +23,7 @@ Options:
 
 
 Version:
-	1.0
+	1.1
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
@@ -136,7 +136,7 @@ sub sift {
 	}
 	close(OUT);
 	close(IN);
-	system("rm -f $outDir/SIFT.temp");
+	system("rm -f $outDir/SIFT.temp") unless $flag_debug;
 }
 
 
@@ -204,7 +204,7 @@ sub polyphen2 {
 	}
 	close(OUT);
 	close(IN);
-	system("rm -f $outDir/PolyPhen2.temp");
+	system("rm -f $outDir/PolyPhen2.temp") unless $flag_debug;
 }
 
 		
@@ -277,7 +277,7 @@ sub mutationAssessor {
 	}
 	close(OUT);
 	close(IN);
-	system("rm -f $outDir/MutationAssessor.temp");
+	system("rm -f $outDir/MutationAssessor.temp") unless $flag_debug;
 }
 
 
@@ -348,5 +348,5 @@ sub mutationTaster {
 	}
 	close(OUT);
 	close(IN);
-	system("rm -f $outDir/MutationTaster.temp");
+	system("rm -f $outDir/MutationTaster.temp") unless $flag_debug;
 }
