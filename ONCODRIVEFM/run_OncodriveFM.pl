@@ -21,7 +21,7 @@ Options:
 
 
 Version:
-	1.0
+	1.1
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
@@ -54,18 +54,36 @@ $out_dir = $config{'default.outDir'};
 
 
 # Generate OncodriveFM input
-my %score_col = (
-    "SIFT_score", 12,
-    "Polyphen2_HDIV_score", 14,
-    "Polyphen2_HVAR_score", 16,
-    "LRT_score", 18,
-    "MutationTaster_score", 20,
-    "MutationAssessor_score", 22,
-    "FATHMM_score", 24,
-    "RadialSVM_score", 26,
-    "LR_score", 28,
-    "VEST3_score", 30,
-    );
+if (index($annot_file, "hg19") != -1) {
+	# hg19
+	my %score_col = (
+	    "SIFT_score", 12,
+	    "Polyphen2_HDIV_score", 14,
+	    "Polyphen2_HVAR_score", 16,
+	    "LRT_score", 18,
+	    "MutationTaster_score", 20,
+	    "MutationAssessor_score", 22,
+	    "FATHMM_score", 24,
+	    "RadialSVM_score", 26,
+	    "LR_score", 28,
+	    "VEST3_score", 30,
+    );    
+} else{
+	# hg18
+	my %score_col = (
+	    "SIFT_score", 10,
+	    "Polyphen2_HDIV_score", 12,
+	    "Polyphen2_HVAR_score", 14,
+	    "LRT_score", 16,
+	    "MutationTaster_score", 18,
+	    "MutationAssessor_score", 20,
+	    "FATHMM_score", 22,
+	    "RadialSVM_score", 24,
+	    "LR_score", 26,
+	    "VEST3_score", 28,
+    );   
+}
+
 
 
 my %score_used = (
