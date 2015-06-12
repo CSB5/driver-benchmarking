@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.6.0";
+my $version = "v3.6.1";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -509,13 +509,6 @@ if($config{'general.HotNet2'}){
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
-	# Parse HotNet2 output to standard format
-	$lastID = $queue[-1];
-	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_HotNet2_parseOutput -e $logsDir/HotNet2_parseOutput.error.log -o $logsDir/HotNet2_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/HOTNET2/parse_to_standard_output.pl --in $config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result --outDir $resultsDir";
-	$command = $command . " --debug" if ($flag_debug);
-	submit($command);
-	
 	print "Job submitted.\n";
 }
 
@@ -627,7 +620,8 @@ sub generateConfig {
 		when( 'HotNet2' ){
 			print OUT "mem=$config{'cluster.mem'}\n";
 			print OUT "runtime=$config{'cluster.runtime'}\n";
-			print OUT "numThreads=$config{'cluster.numThreads'}\n";			
+			print OUT "numThreads=$config{'cluster.numThreads'}\n";
+			print OUT "resultsDir=$resultsDir\n";
 			print OUT "outDir=$analysisDir\n";
 			print OUT "scriptsDir=$config{'general.scriptsDir'}/HOTNET2\n";
 			print OUT "installationDir=$config{'HotNet2.installationDir'}\n";

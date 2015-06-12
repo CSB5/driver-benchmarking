@@ -22,7 +22,7 @@ Options:
 
 
 Version:
-	1.0
+	1.1
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
@@ -103,12 +103,14 @@ close OUT;
 $command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP $config{'default.numThreads'} -N runHotNet2_iref $config{'default.installationDir'}/runHotNet2.py \@$irefConfig";
 print STDERR "$command\n" if ($flag_debug);
 $jid = `$command`;
+chomp($jid);
 push(@queue, $jid);
 
 ## chooseDelta
 $command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $queue[-1] -N chooseDelta_iref $config{'default.scriptsDir'}/choseDelta.py $irefRunFolder $config{'default.sigThreshold'}";
 print STDERR "$command\n" if ($flag_debug);
 $jid = `$command`;
+chomp($jid);
 push(@queue, $jid);
 
 
@@ -117,12 +119,14 @@ push(@queue, $jid);
 $command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP $config{'default.numThreads'} -N runHotNet2_hint $config{'default.installationDir'}/runHotNet2.py \@$hintConfig";
 print STDERR "$command\n" if ($flag_debug);
 $jid = `$command`;
+chomp($jid);
 push(@queue, $jid);
 
 ## chooseDelta
 $command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $queue[-1] -N chooseDelta_hint $config{'default.scriptsDir'}/choseDelta.py $hintRunFolder $config{'default.sigThreshold'}";
 print STDERR "$command\n" if ($flag_debug);
 $jid = `$command`;
+chomp($jid);
 push(@queue, $jid);
 
 
@@ -133,7 +137,9 @@ $consensusResults = "$config{'default.outDir'}/Consensus.results";
 $command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid " . join (",", @queue) . " -N identifyConsensus $config{'default.installationDir'}/identifyConsensus.py -r $irefResults $hintResults -n iref hint_hi2012 -o $consensusResults -ms 2";
 print STDERR "$command\n" if ($flag_debug);
 $jid = `$command`;
+chomp($jid);
 
 
 # Print out Core consensus network genes and rank using information from heat file      
-$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $jid -N generateResults $config{'default.scriptsDir'}/createRankFile.py $consensusResults $geneMutationFile $config{'default.outDir'}";
+$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $jid -N generateResults $config{'default.scriptsDir'}/createRankFile.py $consensusResults $geneMutationFile $config{'default.resultsDir'}";
+print STDERR "$command\n" if ($flag_debug);
