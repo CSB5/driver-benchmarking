@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.5.1";
+my $version = "v3.6.0";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -164,6 +164,16 @@ if($flag_update){
 	print "OncoIMPACT-v1: ";
 	$command = "$config{'general.scriptsDir'}/ONCOIMPACT-V1/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST/ --out $resultsDir/oncoIMPACT-v1.result";
 	if(-s "$config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST/driver_list.txt"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+	
+	# HotNet2
+	print "HotNet2: ";
+	$command = "$config{'general.scriptsDir'}/HOTNET2/parse_to_standard_output.pl --in $config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result --outDir $resultsDir";
+	if(-s "$config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result"){
 		system($command);
 		print "Done\n";
 	} else{
@@ -482,6 +492,34 @@ if($config{'general.oncoIMPACT-v1'}){
 }
 
 
+# HotNet2
+if($config{'general.HotNet2'}){
+	print "Running HotNet2. Please wait...";
+	
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/HOTNET2/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/HOTNET2/LATEST");
+	
+	# Generate config file
+	generateConfig("HotNet2");
+	
+	# Run HotNet2
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_HotNet2 -e $logsDir/HotNet2.error.log -o $logsDir/HotNet2.run.log $config{'general.scriptsDir'}/HOTNET2/run_HotNet2.pl --config $analysisDir/HotNet2_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	# Parse HotNet2 output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_HotNet2_parseOutput -e $logsDir/HotNet2_parseOutput.error.log -o $logsDir/HotNet2_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/HOTNET2/parse_to_standard_output.pl --in $config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result --outDir $resultsDir";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	print "Job submitted.\n";
+}
+
+
 
 
 
@@ -584,6 +622,25 @@ sub generateConfig {
 			print OUT "network=$config{'oncoIMPACT-v1.network'}\n";
 			print OUT "benchmarkGeneList=$config{'oncoIMPACT-v1.benchmarkGeneList'}\n";
 			print OUT "dataType=$config{'oncoIMPACT-v1.dataType'}\n";
+			continue;
+		}			
+		when( 'HotNet2' ){
+			print OUT "mem=$config{'cluster.mem'}\n";
+			print OUT "runtime=$config{'cluster.runtime'}\n";
+			print OUT "numThreads=$config{'cluster.numThreads'}\n";			
+			print OUT "outDir=$analysisDir\n";
+			print OUT "scriptsDir=$config{'general.scriptsDir'}/HOTNET2\n";
+			print OUT "installationDir=$config{'HotNet2.installationDir'}\n";
+			print OUT "sigThreshold=$config{'HotNet2.sigThreshold'}\n";
+			print OUT "freqFile=$config{'HotNet2.freqFile'}\n";
+			print OUT "irefMaf=$config{'HotNet2.irefMaf'}\n";
+			print OUT "irefIndex=$config{'HotNet2.irefIndex'}\n";
+			print OUT "irefNetworks=$config{'HotNet2.irefNetworks'}\n";
+			print OUT "hintMaf=$config{'HotNet2.hintMaf'}\n";
+			print OUT "hintIndex=$config{'HotNet2.hintIndex'}\n";
+			print OUT "hintNetworks=$config{'HotNet2.hintNetworks'}\n";
+			print OUT "deltaPerm=$config{'HotNet2.deltaPerm'}\n";
+			print OUT "sigPerm=$config{'HotNet2.sigPerm'}\n";
 			continue;
 		}			
 		default{

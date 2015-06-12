@@ -132,5 +132,13 @@ if(-s "$config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST/driver_list.txt"){
 	print STATUS "Failed\n";
 }
 
+# HotNet2
+print STATUS "HotNet2: ";
+if(-s "$config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result"){
+	print STATUS "OK\n";
+} else{
+	print STATUS "Failed\n";
+}
+
 
 close(STATUS);
