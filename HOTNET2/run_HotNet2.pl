@@ -143,3 +143,5 @@ chomp($jid);
 # Print out Core consensus network genes and rank using information from heat file      
 $command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $jid -N generateResults $config{'default.scriptsDir'}/createRankFile.py $consensusResults $geneMutationFile $config{'default.resultsDir'}";
 print STDERR "$command\n" if ($flag_debug);
+system($command);
+
