@@ -66,6 +66,7 @@ while(<IN>){
 	$zScore = $temp[7];
 	$pval = $temp[8];
 	$qval = $temp[9];
+	next if($qval eq "NA");
 	last if($qval > $qval_threshold);
 	print OUT $gene . "\t" . "ALL" . "\t" . $counter . "\t" . $qval . "\t" . "geneScore=$geneScore;zScore=$zScore;pValue=$pval" . "\n";
 	$counter++;

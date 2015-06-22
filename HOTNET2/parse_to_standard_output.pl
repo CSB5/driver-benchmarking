@@ -12,7 +12,7 @@ Usage:
 	parse_to_standard_output.pl [OPTIONS]
 
 Options:
-	--in = path to NetBox modules results file *
+	--in = path to HotNet results file *
 	--outDir = path to output directory *
 	--debug: prints trace to STDERR
 	--help : prints this message 
