@@ -21,7 +21,7 @@ Options:
 
 
 Version:
-	1.1
+	1.2
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
@@ -71,6 +71,14 @@ if(-s "$config{'general.analysisDir'}/DAWNRANK/LATEST/driver_list.dat"){
 # DriverNet
 print STATUS "DriverNet: ";
 if(-s "$config{'general.analysisDir'}/DRIVERNET/LATEST/res_driver_net.dat"){
+	print STATUS "OK\n";
+} else{
+	print STATUS "Failed\n";
+}
+
+# HotNet2
+print STATUS "HotNet2: ";
+if(-s "$config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";
@@ -132,9 +140,9 @@ if(-s "$config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST/driver_list.txt"){
 	print STATUS "Failed\n";
 }
 
-# HotNet2
-print STATUS "HotNet2: ";
-if(-s "$config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result"){
+# S2N
+print STATUS "S2N: ";
+if(-s "$config{'general.analysisDir'}/S2N/LATEST/S2N.result"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";
