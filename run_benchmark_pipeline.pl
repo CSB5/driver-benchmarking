@@ -140,6 +140,16 @@ if($flag_update){
 		print "Incomplete run!\n";
 	}
 	
+	# OncodriveCIS
+	print "OncodriveCIS: ";
+	$command = "$config{'general.scriptsDir'}/ONCODRIVECIS/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVECIS/LATEST/oncodriveclust-results.tsv --out $resultsDir/OncodriveCIS.result";
+	if(-s "$config{'general.analysisDir'}/ONCODRIVECIS/LATEST/oncodriveclust-results.tsv"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+	
 	# OncodriveCLUST
 	print "OncodriveCLUST: ";
 	$command = "$config{'general.scriptsDir'}/ONCODRIVECLUST/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVECLUST/LATEST/oncodriveclust-results.tsv --out $resultsDir/OncodriveCLUST.result";
@@ -551,6 +561,34 @@ if($config{'general.S2N'}){
 }
 
 
+# OncodriveCIS
+if($config{'general.OncodriveCIS'}){
+	print "Running OncodriveCIS. Please wait...";
+	
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/ONCODRIVECIS/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCODRIVECIS/LATEST");
+	
+	# Generate config file
+	generateConfig("OncodriveCIS");
+	
+	# Run OncodriveCIS
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCIS -e $logsDir/OncodriveCIS.error.log -o $logsDir/OncodriveCIS.run.log $config{'general.scriptsDir'}/ONCODRIVECIS/run_OncodriveCIS.pl --config $analysisDir/OncodriveCIS_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	# Parse OncodriveCIS output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCIS_parseOutput -e $logsDir/OncodriveCIS_parseOutput.error.log -o $logsDir/OncodriveCIS_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCODRIVECIS/parse_to_standard_output.pl --in $analysisDir --out $resultsDir/OncodriveCIS.result";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	print "Job submitted.\n";
+}
+
+
 
 
 
@@ -682,7 +720,16 @@ sub generateConfig {
 			print OUT "exp=$config{'S2N.exp'}\n";
 			print OUT "cnv=$config{'S2N.cnv'}\n";
 			continue;
-		}			
+		}	
+		when( 'OncodriveCIS' ){
+			print OUT "outDir=$analysisDir\n";
+			print OUT "disease=$config{'general.disease'}\n";
+			print OUT "completeSamples=$config{'general.completeSamples'}\n";
+			print OUT "exp=$config{'S2N.exp'}\n";
+			print OUT "cnv=$config{'S2N.cnv'}\n";
+			print OUT "normals=$config{'S2N.normals'}\n"
+			continue;
+		}				
 		default{
 			close(OUT);
 		}

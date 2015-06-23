@@ -108,6 +108,14 @@ if(-s "$config{'general.analysisDir'}/NETBOX/LATEST/modules.txt"){
 	print STATUS "Failed\n";
 }
 
+# OncodriveCIS
+print STATUS "OncodriveCIS: ";
+if(-s "$config{'general.analysisDir'}/ONCODRIVECIS/LATEST/?.tsv"){
+	print STATUS "OK\n";
+} else{
+	print STATUS "Failed\n";
+}
+
 # OncodriveCLUST
 print STATUS "OncodriveCLUST: ";
 if(-s "$config{'general.analysisDir'}/ONCODRIVECLUST/LATEST/oncodriveclust-results.tsv"){
