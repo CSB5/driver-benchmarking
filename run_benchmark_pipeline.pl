@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.6.1";
+my $version = "v3.7.0";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -98,6 +98,16 @@ if($flag_update){
 		print "Incomplete run!\n";
 	}
 	
+	# HotNet2
+	print "HotNet2: ";
+	$command = "$config{'general.scriptsDir'}/HOTNET2/parse_to_standard_output.pl --in $config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result --outDir $resultsDir";
+	if(-s "$config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+	
 	# LJB
 	print "LJB: ";
 	my $numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
@@ -170,10 +180,10 @@ if($flag_update){
 		print "Incomplete run!\n";
 	}
 	
-	# HotNet2
-	print "HotNet2: ";
-	$command = "$config{'general.scriptsDir'}/HOTNET2/parse_to_standard_output.pl --in $config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result --outDir $resultsDir";
-	if(-s "$config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result"){
+	# S2N
+	print "S2N: ";
+	$command = "$config{'general.scriptsDir'}/S2N/parse_to_standard_output.pl --in $config{'general.analysisDir'}/S2N/LATEST/S2N.result --outDir $resultsDir";
+	if(-s "$config{'general.analysisDir'}/S2N/LATEST/S2N.result"){
 		system($command);
 		print "Done\n";
 	} else{
@@ -513,6 +523,34 @@ if($config{'general.HotNet2'}){
 }
 
 
+# S2N
+if($config{'general.S2N'}){
+	print "Running S2N. Please wait...";
+	
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/S2N/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/S2N/LATEST");
+	
+	# Generate config file
+	generateConfig("S2N");
+	
+	# Run S2N
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_S2N -e $logsDir/S2N.error.log -o $logsDir/S2N.run.log $config{'general.scriptsDir'}/S2N/run_S2N.pl --config $analysisDir/S2N_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	# Parse S2N output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_S2N_parseOutput -e $logsDir/S2N_parseOutput.error.log -o $logsDir/S2N_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/S2N/parse_to_standard_output.pl --in $analysisDir --out $resultsDir/S2N.result";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+	
+	print "Job submitted.\n";
+}
+
+
 
 
 
@@ -635,6 +673,14 @@ sub generateConfig {
 			print OUT "hintNetworks=$config{'HotNet2.hintNetworks'}\n";
 			print OUT "deltaPerm=$config{'HotNet2.deltaPerm'}\n";
 			print OUT "sigPerm=$config{'HotNet2.sigPerm'}\n";
+			continue;
+		}	
+		when( 'S2N' ){
+			print OUT "outDir=$analysisDir\n";
+			print OUT "scriptsDir=$config{'general.scriptsDir'}/S2N\n";
+			print OUT "completeSamples=$config{'general.completeSamples'}\n";
+			print OUT "exp=$config{'S2N.exp'}\n";
+			print OUT "cnv=$config{'S2N.cnv'}\n";
 			continue;
 		}			
 		default{
