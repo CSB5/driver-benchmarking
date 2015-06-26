@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.7.0";
+my $version = "v3.7.1";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -70,7 +70,7 @@ if($flag_update){
 	
 	# CHASM
 	print "CHASM: ";
-	$command = "$config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $config{'general.analysisDir'}/CHASM/LATEST --out $resultsDir/CHASM.result";
+	$command = "$config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $config{'general.analysisDir'}/CHASM/LATEST --outDir $resultsDir";
 	if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant_Additional_Details.Result.tsv"){
 		system($command);
 		print "Done\n";
@@ -142,8 +142,8 @@ if($flag_update){
 	
 	# OncodriveCIS
 	print "OncodriveCIS: ";
-	$command = "$config{'general.scriptsDir'}/ONCODRIVECIS/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVECIS/LATEST/oncodriveclust-results.tsv --out $resultsDir/OncodriveCIS.result";
-	if(-s "$config{'general.analysisDir'}/ONCODRIVECIS/LATEST/oncodriveclust-results.tsv"){
+	$command = "$config{'general.scriptsDir'}/ONCODRIVECIS/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVECIS/LATEST/OncoCNA.combined.txt --out $resultsDir/OncodriveCIS.result";
+	if(-s "$config{'general.analysisDir'}/ONCODRIVECIS/LATEST/OncoCNA.combined.txt"){
 		system($command);
 		print "Done\n";
 	} else{
@@ -475,7 +475,7 @@ if($config{'general.CHASM'}){
 	# Parse CHASM output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_CHASM_parseOutput -e $logsDir/CHASM_parseOutput.error.log -o $logsDir/CHASM_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $analysisDir --out $resultsDir/CHASM.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_CHASM_parseOutput -e $logsDir/CHASM_parseOutput.error.log -o $logsDir/CHASM_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $analysisDir --outDir $resultsDir";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -581,7 +581,7 @@ if($config{'general.OncodriveCIS'}){
 	# Parse OncodriveCIS output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCIS_parseOutput -e $logsDir/OncodriveCIS_parseOutput.error.log -o $logsDir/OncodriveCIS_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCODRIVECIS/parse_to_standard_output.pl --in $analysisDir --out $resultsDir/OncodriveCIS.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCIS_parseOutput -e $logsDir/OncodriveCIS_parseOutput.error.log -o $logsDir/OncodriveCIS_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCODRIVECIS/parse_to_standard_output.pl --in $analysisDir/OncoCNA.combined.txt --out $resultsDir/OncodriveCIS.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	
@@ -643,7 +643,7 @@ sub generateConfig {
 			print OUT "covariate=$config{'MutSigCV.covariate'}\n";
 			print OUT "dict=$config{'MutSigCV.dict'}\n";
 			print OUT "chr=$config{'MutSigCV.chr'}\n";
-			print OUT "prefix=$config{'MutSigCV.prefix'}\n";
+			print OUT "prefix=$config{'general.disease'}\n";
 			continue;
 		}		
 		when( 'OncodriveFM' ){
@@ -723,11 +723,12 @@ sub generateConfig {
 		}	
 		when( 'OncodriveCIS' ){
 			print OUT "outDir=$analysisDir\n";
+			print OUT "scriptsDir=$config{'general.scriptsDir'}/ONCODRIVECIS\n";
 			print OUT "disease=$config{'general.disease'}\n";
 			print OUT "completeSamples=$config{'general.completeSamples'}\n";
 			print OUT "exp=$config{'S2N.exp'}\n";
 			print OUT "cnv=$config{'S2N.cnv'}\n";
-			print OUT "normals=$config{'S2N.normals'}\n"
+			print OUT "normals=$config{'S2N.normals'}\n";
 			continue;
 		}				
 		default{

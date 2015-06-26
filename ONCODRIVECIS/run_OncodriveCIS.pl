@@ -174,6 +174,14 @@ system($command);
 print "done.\n";
 
 
+# Compute pVal & FDR
+print "Computing pVal & FDR. Please wait...";
+$command = "$config{'default.scriptsDir'}/compute_pVal_fdr.R $config{'default.outDir'}";
+print STDERR "$command\n" if($flag_debug);
+system($command);
+print "done.\n";
+
+
 #### Sub-routines
 sub convert_sample_name{
     my ($f_s_n) = @_;

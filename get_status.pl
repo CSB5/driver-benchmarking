@@ -110,7 +110,7 @@ if(-s "$config{'general.analysisDir'}/NETBOX/LATEST/modules.txt"){
 
 # OncodriveCIS
 print STATUS "OncodriveCIS: ";
-if(-s "$config{'general.analysisDir'}/ONCODRIVECIS/LATEST/?.tsv"){
+if(-s "$config{'general.analysisDir'}/ONCODRIVECIS/LATEST/OncoCNA.combined.txt"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";
