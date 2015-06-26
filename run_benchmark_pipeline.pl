@@ -67,10 +67,13 @@ if($flag_update){
 	print "Updating latest consolidated results. Please wait.\n";
 	my $resultsDir = "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST";
 	my $logsDir = "$config{'general.analysisDir'}/LOGS/$runID";
+	my $numSamples;
 	
 	# CHASM
 	print "CHASM: ";
-	$command = "$config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $config{'general.analysisDir'}/CHASM/LATEST --outDir $resultsDir";
+	$numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
+	chomp($numSamples);
+	$command = "$config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $config{'general.analysisDir'}/CHASM/LATEST --samples $numSamples --outDir $resultsDir";
 	if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant_Additional_Details.Result.tsv"){
 		system($command);
 		print "Done\n";
@@ -110,7 +113,7 @@ if($flag_update){
 	
 	# LJB
 	print "LJB: ";
-	my $numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
+	$numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
 	chomp($numSamples);
 	$command = "$config{'general.scriptsDir'}/LJB/parse_to_standard_output.pl --in $config{'LJB.annotation'} --samples $numSamples --outDir $resultsDir";
 	if(-s "$config{'LJB.annotation'}"){
@@ -475,7 +478,9 @@ if($config{'general.CHASM'}){
 	# Parse CHASM output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_CHASM_parseOutput -e $logsDir/CHASM_parseOutput.error.log -o $logsDir/CHASM_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $analysisDir --outDir $resultsDir";
+	my $numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
+	chomp($numSamples);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_CHASM_parseOutput -e $logsDir/CHASM_parseOutput.error.log -o $logsDir/CHASM_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $analysisDir --samples $numSamples --outDir $resultsDir";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 	

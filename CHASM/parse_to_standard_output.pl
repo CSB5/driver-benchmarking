@@ -4,7 +4,7 @@ use warnings;
 use Getopt::Long;
 use List::Util qw(sum);
 
-my ($inDir, $outDir, $flag_debug, $flag_help);
+my ($inDir, $outDir, $numSamples, $flag_debug, $flag_help);
 
 my $help_message = "
 This script parses CHASM's output to a standard output.
@@ -14,6 +14,7 @@ Usage:
 
 Options:
 	--inDir = path to CHASM results folder *
+	--samples = number of samples *
 	--outDir = path to output folder *
 	--debug: prints trace to STDERR
 	--help : prints this message 
@@ -35,6 +36,7 @@ if ( @ARGV == 0 ) {
 
 GetOptions(
 	"inDir=s"      	=> \$inDir,
+	"samples=i"		=> \$numSamples,
 	"outDir=s"     	=> \$outDir,
 	"debug"         => \$flag_debug,
 	"help"          => \$flag_help
@@ -49,6 +51,7 @@ if ($flag_help) {
 if ($flag_debug) {
 	print STDERR "Input parameters:\n";
 	print STDERR "INPUT DIR: $inDir\n";
+	print STDERR "Number of samples: $numSamples\n";
 	print STDERR "OUTPUT DIR: $outDir\n";	
 }
 
@@ -86,7 +89,7 @@ close(FILE);
 # Compute average score for each gene
 foreach $geneID (sort keys %scores) {
 	print STDERR "$geneID:" . join(",", @{$scores{$geneID}}) . "\n" if($flag_debug);
-	$avgScore{$geneID} = mean(@{$scores{$geneID}});
+	$avgScore{$geneID} = sum(@{$scores{$geneID}})/$numSamples;
 }
 
 # Generate report
@@ -109,9 +112,3 @@ foreach $geneID (sort { $avgScore{$b} <=> $avgScore{$a} or $a cmp $b } keys %avg
 	$rank++;
 }
 close(OUT);
-
-
-## Sub routine
-sub mean {
-    return sum(@_)/@_;
-}
