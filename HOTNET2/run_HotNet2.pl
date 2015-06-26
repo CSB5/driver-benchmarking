@@ -5,7 +5,7 @@ use Config::Simple;
 use Getopt::Long;
 
 my ($configFile, %config, $flag_debug, $flag_help, $command);
-my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -v PATH,PERL5LIB,R_LIBS_SITE,MOSEKLM_LICENSE_FILE,AUGUSTUS_CONFIG_PATH,CLASSPATH,NETBOX_HOME";
+my $qsub = "qsub -terse -m ae -M \$USER_PRINCIPAL_NAME -cwd -v PATH,PERL5LIB,R_LIBS_SITE,MOSEKLM_LICENSE_FILE,AUGUSTUS_CONFIG_PATH,CLASSPATH,NETBOX_HOME";
 
 my $help_message = "
 This script runs HotNet2.
