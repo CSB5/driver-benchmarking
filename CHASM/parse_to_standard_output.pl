@@ -75,7 +75,7 @@ while(<FILE>){
 		$bestScore{$geneID} = $geneScore;
 	} 
 	push(@{$samples{$geneID}}, $sampleID);
-	push(@{$samples{$geneID}}, $geneScore);
+	push(@{$scores{$geneID}}, $geneScore);
 	if($geneScore > $bestScore{$geneID}){
 		$bestScore{$geneID} = $geneScore; 
 		$fdrs{$geneID} = $fdr;		
@@ -85,6 +85,7 @@ close(FILE);
 
 # Compute average score for each gene
 foreach $geneID (sort keys %scores) {
+	print STDERR "$geneID:" . join(",", @{$scores{$geneID}}) . "\n" if($flag_debug);
 	$avgScore{$geneID} = mean(@{$scores{$geneID}});
 }
 
@@ -102,9 +103,9 @@ close(OUT);
 ## Generating report for avg score
 open(OUT, ">$outDir/CHASM.average.result");
 print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
-my $rank = 1;
+$rank = 1;
 foreach $geneID (sort { $avgScore{$b} <=> $avgScore{$a} or $a cmp $b } keys %avgScore) {
-	print OUT $geneID. "\t" . join(";", @{$samples{$geneID}}) . "\t" . $rank . "\t" . $avg{$geneID} . "\t" . "\n";
+	print OUT $geneID. "\t" . join(";", @{$samples{$geneID}}) . "\t" . $rank . "\t" . $avgScore{$geneID} . "\t" . "-" . "\n";
 	$rank++;
 }
 close(OUT);
