@@ -101,7 +101,7 @@ foreach $geneID (sort { $bestScore{$b} <=> $bestScore{$a} or $a cmp $b } keys %b
 close(OUT);
 
 ## Generating report for avg score
-open(OUT, ">$outDir/CHASM.average.result");
+open(OUT, ">$outDir/CHASM_average.result");
 print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
 $rank = 1;
 foreach $geneID (sort { $avgScore{$b} <=> $avgScore{$a} or $a cmp $b } keys %avgScore) {
