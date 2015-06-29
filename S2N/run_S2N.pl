@@ -169,6 +169,7 @@ for (my $i = 0; $i < @gene_order; $i++){
 		$sample = $sample_order[$j];
 		print OUT "\t".$gene_expression{$gene}->{$sample};
     }
+    print OUT "\n";
 }
 
 close(OUT);
