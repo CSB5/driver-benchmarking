@@ -59,16 +59,16 @@ my ($counter, @temp, $gene, $score, $type, $threshold, %reportedGenes, $currentG
 
 if (index($file_in, "hg19") != -1) {
 	# hg19
-	sift("7,13,48");
-	polyphen2("7,17,48");
-	mutationAssessor("7,23,24,48");
-	mutationTaster("7,21,22,48");    
+	sift("7,13,53");
+	polyphen2("7,17,53");
+	mutationAssessor("7,23,24,53");
+	mutationTaster("7,21,22,53");    
 } else{
 	# hg18
-	sift("7,11,46");
-	polyphen2("7,15,46");
-	mutationAssessor("7,21,22,46");
-	mutationTaster("7,19,20,46");  
+	sift("7,11,51");
+	polyphen2("7,15,51");
+	mutationAssessor("7,21,22,51");
+	mutationTaster("7,19,20,51");  
 }
 
 
