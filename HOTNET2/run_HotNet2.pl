@@ -16,13 +16,13 @@ Usage:
 Options:
 	--config = path to config file *
 	--debug: prints trace to STDERR
-	--help : prints this message 
-	
-* indicates required parameters	
+	--help : prints this message
+
+* indicates required parameters
 
 
 Version:
-	1.1
+	1.2
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
@@ -107,7 +107,7 @@ chomp($jid);
 push(@queue, $jid);
 
 ## chooseDelta
-$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $queue[-1] -N chooseDelta_iref $config{'default.scriptsDir'}/choseDelta.py $irefRunFolder $config{'default.sigThreshold'}";
+$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $queue[-1] -N chooseDelta_iref $config{'default.scriptsDir'}/choseDelta-v2.py $irefRunFolder $config{'default.resultsDir'} $config{'default.sigThreshold'}";
 print STDERR "$command\n" if ($flag_debug);
 $jid = `$command`;
 chomp($jid);
@@ -123,25 +123,8 @@ chomp($jid);
 push(@queue, $jid);
 
 ## chooseDelta
-$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $queue[-1] -N chooseDelta_hint $config{'default.scriptsDir'}/choseDelta.py $hintRunFolder $config{'default.sigThreshold'}";
+$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $queue[-1] -N chooseDelta_hint $config{'default.scriptsDir'}/choseDelta-v2.py $hintRunFolder $config{'default.resultsDir'} $config{'default.sigThreshold'}";
 print STDERR "$command\n" if ($flag_debug);
 $jid = `$command`;
 chomp($jid);
 push(@queue, $jid);
-
-
-# identifyConsensus
-$irefResults = "$irefRunFolder/results.json";
-$hintResults = "$hintRunFolder/results.json";
-$consensusResults = "$config{'default.outDir'}/Consensus.results";
-$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid " . join (",", @queue) . " -N identifyConsensus $config{'default.installationDir'}/identifyConsensus.py -r $irefResults $hintResults -n iref hint_hi2012 -o $consensusResults -ms 2";
-print STDERR "$command\n" if ($flag_debug);
-$jid = `$command`;
-chomp($jid);
-
-
-# Print out Core consensus network genes and rank using information from heat file      
-$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $jid -N generateResults $config{'default.scriptsDir'}/createRankFile.py $consensusResults $geneMutationFile $config{'default.resultsDir'}";
-print STDERR "$command\n" if ($flag_debug);
-system($command);
-
