@@ -98,7 +98,7 @@ while(<FILE>){
     $nb_snv++;
     
     @splicing_effect = split(/\;/, $line[5]);
-    @splicing_effect = ($line[5]) if(@all_effect == 0);
+    @splicing_effect = ($line[5]) if(@splicing_effect == 0);
 
     @all_effect = split(/\;/, $line[8]);
     @all_effect = ($line[8]) if(@all_effect == 0);

@@ -17,9 +17,9 @@ Options:
 	--samples = number of samples *
 	--outDir = path to output folder *
 	--debug: prints trace to STDERR
-	--help : prints this message 
-	
-* indicates required parameters	
+	--help : prints this message
+
+* indicates required parameters
 
 
 Version:
@@ -51,7 +51,7 @@ if ($flag_help) {
 if ($flag_debug) {
 	print STDERR "Input parameters:\n";
 	print STDERR "INPUT: $file_in\n";
-	print STDERR "OUTPUT DIR: $outDir\n";	
+	print STDERR "OUTPUT DIR: $outDir\n";
 }
 
 
@@ -59,22 +59,22 @@ my ($counter, @temp, $gene, $score, $type, $threshold, %reportedGenes, $currentG
 
 if (index($file_in, "hg19") != -1) {
 	# hg19
-	sift("7,13,53");
-	polyphen2("7,17,53");
-	mutationAssessor("7,23,24,53");
-	mutationTaster("7,21,22,53");    
+	sift("7,13,58");
+	polyphen2("7,17,58");
+	mutationAssessor("7,23,24,58");
+	mutationTaster("7,21,22,58");
 } else{
 	# hg18
-	sift("7,11,51");
-	polyphen2("7,15,51");
-	mutationAssessor("7,21,22,51");
-	mutationTaster("7,19,20,51");  
+	sift("7,11,56");
+	polyphen2("7,15,56");
+	mutationAssessor("7,21,22,56");
+	mutationTaster("7,19,20,56");  
 }
 
 
 ######## sub routines ########
 # SIFT
-sub sift {	
+sub sift {
 	$threshold = 0.05;
 	$file_out = "$outDir/SIFT.temp";
 	open(OUT, ">$file_out");
@@ -91,18 +91,18 @@ sub sift {
 		$sample = $temp[2];
 		next if ($score eq "." || $score > $threshold);	# skip current entry as <score> doesn't meet requirement
 		if( $gene ne $currentGene && $currentGene ne ""){	# new gene encountered
-			# push previous entry to array 
+			# push previous entry to array
 			push(@currentScore, (1 - $bestScore));
-			push(@samples, $currentSample);	
-			
+			push(@samples, $currentSample);
+
 			# Print results and re-initialize variables
 			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
 			$currentGene = "";
-			@currentScore = ();		
+			@currentScore = ();
 			$currentSample = "";
 			$bestScore = $score;
 			@samples = ();
-		} 
+		}
 		$currentSample = $sample if ($currentSample eq "");
 		$currentGene = $gene if ($currentGene eq "");
 		if( $sample ne $currentSample){	# new sample encountered
@@ -110,17 +110,17 @@ sub sift {
 			push(@currentScore, (1 - $bestScore));
 			push(@samples, $currentSample);
 			$currentSample = $sample;
-			$bestScore = 1;	
-		} 
-		$bestScore = $score if ($score < $bestScore);		
+			$bestScore = 1;
+		}
+		$bestScore = $score if ($score < $bestScore);
 	}
-	# Print last entry 
+	# Print last entry
 	push(@currentScore, (1 - $bestScore));
-	push(@samples, $currentSample);	
+	push(@samples, $currentSample);
 	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
 	close(OUT);
 	close(IN);
-		
+
 	$counter = 1;
 	$file_out = "$outDir/SIFT.result";
 	open(IN, "sort -k2,2gr $outDir/SIFT.temp |");
@@ -159,18 +159,18 @@ sub polyphen2 {
 		$sample = $temp[2];
 		next if ($score eq "." || $score < $threshold);	# skip current entry as <score> doesn't meet requirement
 		if( $gene ne $currentGene && $currentGene ne ""){	# new gene encountered
-			# push previous entry to array 
+			# push previous entry to array
 			push(@currentScore, $bestScore);
 			push(@samples, $currentSample);
-			
+
 			# Print results and re-initialize variables
 			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
 			$currentGene = "";
-			@currentScore = ();		
+			@currentScore = ();
 			$currentSample = "";
 			$bestScore = $score;
 			@samples = ();
-		} 
+		}
 		$currentSample = $sample if ($currentSample eq "");
 		$currentGene = $gene if ($currentGene eq "");
 		if( $sample ne $currentSample){	# new sample encountered
@@ -178,9 +178,9 @@ sub polyphen2 {
 			push(@currentScore, $bestScore);
 			push(@samples, $currentSample);
 			$currentSample = $sample;
-			$bestScore = 0;	
-		} 
-		$bestScore = $score if ($score > $bestScore);		
+			$bestScore = 0;
+		}
+		$bestScore = $score if ($score > $bestScore);
 	}
 	# Print last entry
 	push(@currentScore, $bestScore);
@@ -188,7 +188,7 @@ sub polyphen2 {
 	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
 	close(OUT);
 	close(IN);
-	
+
 	$counter = 1;
 	$file_out = "$outDir/PolyPhen2.result";
 	open(IN, "sort -k2,2gr $outDir/PolyPhen2.temp |");
@@ -207,7 +207,7 @@ sub polyphen2 {
 	system("rm -f $outDir/PolyPhen2.temp") unless $flag_debug;
 }
 
-		
+
 # MutationAssessor
 sub mutationAssessor {
 	$file_out = "$outDir/MutationAssessor.temp";
@@ -229,18 +229,18 @@ sub mutationAssessor {
 					 #|| $type eq "M" # relaxed mode
 		);	# skip current entry as <type> doesn't meet requirement
 		if( $gene ne $currentGene && $currentGene ne ""){	# new gene encountered
-			# push previous entry to array 
+			# push previous entry to array
 			push(@currentScore, $bestScore);
 			push(@samples, $currentSample);
-			
+
 			# Print results and re-initialize variables
 			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
 			$currentGene = "";
-			@currentScore = ();		
+			@currentScore = ();
 			$currentSample = "";
 			$bestScore = $score;
 			@samples = ();
-		} 
+		}
 		$currentSample = $sample if ($currentSample eq "");
 		$currentGene = $gene if ($currentGene eq "");
 		if( $sample ne $currentSample){	# new sample encountered
@@ -248,9 +248,9 @@ sub mutationAssessor {
 			push(@currentScore, $bestScore);
 			push(@samples, $currentSample);
 			$currentSample = $sample;
-			$bestScore = 0;	
-		} 
-		$bestScore = $score if ($score > $bestScore);		
+			$bestScore = 0;
+		}
+		$bestScore = $score if ($score > $bestScore);
 	}
 	# Print last entry
 	push(@currentScore, $bestScore);
@@ -258,7 +258,7 @@ sub mutationAssessor {
 	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
 	close(OUT);
 	close(IN);
-	
+
 	$counter = 1;
 	$file_out = "$outDir/MutationAssessor.result";
 	open(IN, "sort -k2,2gr $outDir/MutationAssessor.temp | ");
@@ -301,18 +301,18 @@ sub mutationTaster {
 		next if ($score eq ".");	# skip current entry as <score> doesn't meet requirement
 		next unless ($type eq "A" || $type eq "D");	# skip current entry as <type> doesn't meet requirement
 		if( $gene ne $currentGene && $currentGene ne ""){	# new gene encountered
-			# push previous entry to array 
+			# push previous entry to array
 			push(@currentScore, $bestScore);
 			push(@samples, $currentSample);
-			
+
 			# Print results and re-initialize variables
 			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
 			$currentGene = "";
-			@currentScore = ();		
+			@currentScore = ();
 			$currentSample = "";
 			$bestScore = $score;
 			@samples = ();
-		} 
+		}
 		$currentSample = $sample if ($currentSample eq "");
 		$currentGene = $gene if ($currentGene eq "");
 		if( $sample ne $currentSample){	# new sample encountered
@@ -320,9 +320,9 @@ sub mutationTaster {
 			push(@currentScore, $bestScore);
 			push(@samples, $currentSample);
 			$currentSample = $sample;
-			$bestScore = 0;	
-		} 
-		$bestScore = $score if ($score > $bestScore);		
+			$bestScore = 0;
+		}
+		$bestScore = $score if ($score > $bestScore);
 	}
 	# Print last entry
 	push(@currentScore, $bestScore);
@@ -330,7 +330,7 @@ sub mutationTaster {
 	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
 	close(OUT);
 	close(IN);
-	
+
 	$counter = 1;
 	$file_out = "$outDir/MutationTaster.result";
 	open(IN, "sort -k2,2gr $outDir/MutationTaster.temp |");
