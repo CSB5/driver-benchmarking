@@ -50,7 +50,7 @@ print "Reading config file. Please wait...";
 Config::Simple->import_from( $configFile, \%config );
 print "done.\n";
 
-my ($geneMutationFile, $irefRunFolder, $hintRunFolder, $irefConfig, $hintConfig, $irefResults, $hintResults, $consensusResults, $rankFolder, $jid, @queue);
+my ($geneMutationFile, $irefRunFolder, $irefConfig, $irefResults, $jid);
 my $runtime = "$config{'default.runtime'}:0:0";
 
 # Preparing output folder
@@ -67,9 +67,7 @@ print STDERR "$command\n" if ($flag_debug);
 
 # Generate scripts
 $irefRunFolder = "$config{'default.outDir'}/IREF";
-$hintRunFolder = "$config{'default.outDir'}/HINT";
 $irefConfig = "$config{'default.outDir'}/iref.cfg";
-$hintConfig = "$config{'default.outDir'}/hint.cfg";
 
 ## Generating irefConfig
 open(OUT, ">$irefConfig");
@@ -84,19 +82,6 @@ print OUT "--significance_permutations $config{'default.sigPerm'}\n";
 print OUT "--num_cores $config{'default.numThreads'}\n";
 close OUT;
 
-## Generate hintConfig
-open(OUT, ">$hintConfig");
-print OUT "--runname hint\n";
-print OUT "--infmat_file $config{'default.hintMaf'}\n";
-print OUT "--infmat_index_file $config{'default.hintIndex'}\n";
-print OUT "--permuted_networks_path $config{'default.hintNetworks'}\n";
-print OUT "--heat_file $geneMutationFile\n";
-print OUT "--output_directory $hintRunFolder\n";
-print OUT "--delta_permutations $config{'default.deltaPerm'}\n";
-print OUT "--significance_permutations $config{'default.sigPerm'}\n";
-print OUT "--num_cores $config{'default.numThreads'}\n";
-close OUT;
-
 
 # iref run
 ## run HotNet2
@@ -104,27 +89,8 @@ $command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP $
 print STDERR "$command\n" if ($flag_debug);
 $jid = `$command`;
 chomp($jid);
-push(@queue, $jid);
 
 ## chooseDelta
-$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $queue[-1] -N chooseDelta_iref $config{'default.scriptsDir'}/choseDelta-v2.py $irefRunFolder $config{'default.resultsDir'} $config{'default.sigThreshold'}";
+$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $jid -N chooseDelta_iref $config{'default.scriptsDir'}/choseDelta-v2.py $irefRunFolder $geneMutationFile $config{'default.resultsDir'} $config{'default.sigThreshold'}";
 print STDERR "$command\n" if ($flag_debug);
-$jid = `$command`;
-chomp($jid);
-push(@queue, $jid);
-
-
-# hint run
-## run HotNet2
-$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP $config{'default.numThreads'} -N runHotNet2_hint $config{'default.installationDir'}/runHotNet2.py \@$hintConfig";
-print STDERR "$command\n" if ($flag_debug);
-$jid = `$command`;
-chomp($jid);
-push(@queue, $jid);
-
-## chooseDelta
-$command = "$qsub -l mem_free=$config{'default.mem'}G,h_rt=$runtime -pe OpenMP 1 -hold_jid $queue[-1] -N chooseDelta_hint $config{'default.scriptsDir'}/choseDelta-v2.py $hintRunFolder $config{'default.resultsDir'} $config{'default.sigThreshold'}";
-print STDERR "$command\n" if ($flag_debug);
-$jid = `$command`;
-chomp($jid);
-push(@queue, $jid);
+system($command);
