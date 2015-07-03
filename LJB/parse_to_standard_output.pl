@@ -23,7 +23,7 @@ Options:
 
 
 Version:
-	1.1
+	1.2
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
@@ -68,7 +68,7 @@ if (index($file_in, "hg19") != -1) {
 	sift("7,11,56");
 	polyphen2("7,15,56");
 	mutationAssessor("7,21,22,56");
-	mutationTaster("7,19,20,56");  
+	mutationTaster("7,19,20,56");
 }
 
 
@@ -142,8 +142,8 @@ sub sift {
 
 # Polyphen2_HVAR_score
 sub polyphen2 {
-	$threshold = 0.909; # stringent mode
-	# $threshold = 0.446; # relaxed mode
+	# $threshold = 0.909; # stringent mode
+	$threshold = 0.446; # relaxed mode (possibly damaging)
 	$file_out = "$outDir/PolyPhen2.temp";
 	open(OUT, ">$file_out");
 	open(IN, "cut -f $_[0] $file_in | tail -n+2 | sort -k1,1 -k3,3 |");
@@ -225,8 +225,8 @@ sub mutationAssessor {
 		$type = $temp[2];
 		$sample = $temp[3];
 		next if ($score eq ".");	# skip current entry as <score> doesn't meet requirement
-		next unless ($type eq "H"	# stringent mode
-					 #|| $type eq "M" # relaxed mode
+		next unless ($type eq "H"	# stringent mode (high only)
+					 || $type eq "M" # relaxed mode (high and medium only)
 		);	# skip current entry as <type> doesn't meet requirement
 		if( $gene ne $currentGene && $currentGene ne ""){	# new gene encountered
 			# push previous entry to array
