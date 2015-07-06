@@ -3,11 +3,6 @@
 # how to run this script:
 # ./GBM_ActiveDriver_v4.r -a '/mnt/projects/bertrandd/oncoimpact/MUTATION_BENCHMARK/DATA/GBM/annovar.hg19_multianno.txt' -f '/mnt/projects/bertrandd/oncoimpact/MUTATION_BENCHMARK/SOFTWARE_TESTBED/ActiveDriver/ActiveDriver_allPTMsites.results'
 
-# Check if ActiveDriver is installed and install it otherwise.
-if(!require("ActiveDriver")){
-  install.packages("http://individual.utoronto.ca/reimand/ActiveDriver/ActiveDriver_0.0.10.tar.gz", repo=NULL, type="source")
-}
-
 suppressPackageStartupMessages(library(ActiveDriver))
 suppressPackageStartupMessages(library(stringr))
 suppressPackageStartupMessages(library(plyr))
