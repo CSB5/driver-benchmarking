@@ -3,7 +3,7 @@
 use warnings;
 use Getopt::Long;
 
-my ($file_in, $file_out, $mutation_frequency_file, $out_dir, $flag_debug, $flag_help);
+my ($file_in, $out_dir, $flag_debug, $flag_help);
 
 my $help_message = "
 This script parses HotNet2's output to a standard output.
@@ -15,9 +15,9 @@ Options:
 	--in = path to HotNet results file *
 	--outDir = path to output directory *
 	--debug: prints trace to STDERR
-	--help : prints this message 
-	
-* indicates required parameters	
+	--help : prints this message
+
+* indicates required parameters
 
 
 Version:
@@ -48,7 +48,7 @@ if ($flag_help) {
 if ($flag_debug) {
 	print STDERR "Input parameters:\n";
 	print STDERR "INPUT: $file_in\n";
-	print STDERR "OUTPUT: $out_dir\n";	
+	print STDERR "OUTPUT: $out_dir\n";
 }
 
 system("cp $file_in $out_dir");
