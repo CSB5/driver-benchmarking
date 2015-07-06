@@ -77,7 +77,7 @@ $file_in = "$config{'default.outDir'}/transFIC.input";
 $file_intermediate = "$config{'default.outDir'}/transFIC.intermediate";
 $file_final = "$config{'default.outDir'}/transFIC.result";
 
-open(OUT, ">$res_file");
+open(OUT, ">$file_in");
 open(FILE, $config{'default.annotation'});
 while(<FILE>){
   chop $_;
