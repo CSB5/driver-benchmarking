@@ -48,6 +48,11 @@ print "Reading config file. Please wait...";
 Config::Simple->import_from( $configFile, \%config );
 print "done.\n";
 
+# Create output directory if it doesn't exists
+$command = "mkdir $config{'default.outDir'}";
+print STDERR "$command\n" if($flag_debug);
+system($command) unless (-d $config{'default.outDir'});
+
 # Run ActiveDriver against default database
 print "Running ActiveDriver against phospho sites. Please wait...";
 $command = "$config{'default.scriptsDir'}/ActiveDriver_phospho.R -a $config{'default.annotation'} -f $config{'default.outDir'}/ActiveDriver_phospho.result";
