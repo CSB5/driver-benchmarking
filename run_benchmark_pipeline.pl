@@ -12,7 +12,7 @@ my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
 my ( $configFile, $flag_debug, $flag_help, $flag_update, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir);
-my $qsub = "qsub -terse -m ae -M \$USER_PRINCIPAL_NAME -cwd -v PATH,PERL5LIB,R_LIBS_SITE,MOSEKLM_LICENSE_FILE,AUGUSTUS_CONFIG_PATH,CLASSPATH,NETBOX_HOME";
+my $qsub = "qsub -terse -m ae -M \$USER_PRINCIPAL_NAME -cwd -V";
 
 my $help_message = "
 This script runs various softwares for benchmarking.
@@ -25,9 +25,9 @@ Options:
 	--debug: prints trace to STDERR
 	--sim: simulation mode - only prints commands to be executed to TRACE log
 	--update: update mode - only regenerates consolidated results
-	--help : prints this message 
-	
-* indicates required parameters	
+	--help : prints this message
+
+* indicates required parameters
 
 
 Version:
@@ -63,12 +63,12 @@ print "done.\n";
 
 # Update only mode
 if($flag_update){
-	
+
 	print "Updating latest consolidated results. Please wait.\n";
 	my $resultsDir = "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST";
 	my $logsDir = "$config{'general.analysisDir'}/LOGS/$runID";
 	my $numSamples;
-	
+
 	# CHASM
 	print "CHASM: ";
 	$numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
@@ -80,7 +80,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	# DawnRank
 	print "DawnRank: ";
 	$command = "$config{'general.scriptsDir'}/DAWNRANK/parse_to_standard_output.pl --in $config{'general.analysisDir'}/DAWNRANK/LATEST/driver_list.dat --out $resultsDir/DawnRank.result";
@@ -90,7 +90,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	# DriverNet
 	print "DriverNet: ";
 	$command = "$config{'general.scriptsDir'}/DRIVERNET/parse_to_standard_output.pl --in $config{'general.analysisDir'}/DRIVERNET/LATEST/res_driver_net.dat --out $resultsDir/DriverNet.result";
@@ -100,7 +100,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	# HotNet2
 	print "HotNet2: ";
 	$command = "$config{'general.scriptsDir'}/HOTNET2/parse_to_standard_output.pl --in $config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result --outDir $resultsDir";
@@ -110,7 +110,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	# LJB
 	print "LJB: ";
 	$numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
@@ -122,7 +122,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	# MutSigCV
 	print "MutSigCV: ";
 	$command = "$config{'general.scriptsDir'}/MUTSIGCV/parse_to_standard_output.pl --in $config{'general.analysisDir'}/MUTSIGCV/LATEST/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
@@ -132,7 +132,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	# NetBox
 	print "NetBox: ";
 	$command = "$config{'general.scriptsDir'}/NETBOX/parse_to_standard_output.pl --in $config{'general.analysisDir'}/NETBOX/LATEST/modules.txt --mutation $config{'NetBox.mutationFrequency'} --outDir $resultsDir";
@@ -142,7 +142,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	# OncodriveCIS
 	print "OncodriveCIS: ";
 	$command = "$config{'general.scriptsDir'}/ONCODRIVECIS/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVECIS/LATEST/OncoCNA.combined.txt --out $resultsDir/OncodriveCIS.result";
@@ -152,7 +152,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	# OncodriveCLUST
 	print "OncodriveCLUST: ";
 	$command = "$config{'general.scriptsDir'}/ONCODRIVECLUST/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVECLUST/LATEST/oncodriveclust-results.tsv --out $resultsDir/OncodriveCLUST.result";
@@ -162,7 +162,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	# OncodriveFM
 	print "OncodriveFM: ";
 	$command = "$config{'general.scriptsDir'}/ONCODRIVEFM/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCODRIVEFM/LATEST/OncodriveFM-genes.tsv --out $resultsDir/OncodriveFM.result";
@@ -172,7 +172,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-		
+
 	# OncoIMPACT
 	print "OncoIMPACT: ";
 	$command = "$config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCOIMPACT/LATEST/ --out $resultsDir/oncoIMPACT.result";
@@ -182,7 +182,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	# OncoIMPACT-v1
 	print "OncoIMPACT-v1: ";
 	$command = "$config{'general.scriptsDir'}/ONCOIMPACT-V1/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST/ --out $resultsDir/oncoIMPACT-v1.result";
@@ -192,7 +192,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	# S2N
 	print "S2N: ";
 	$command = "$config{'general.scriptsDir'}/S2N/parse_to_standard_output.pl --in $config{'general.analysisDir'}/S2N/LATEST/S2N.result --outDir $resultsDir";
@@ -202,7 +202,7 @@ if($flag_update){
 	} else{
 		print "Incomplete run!\n";
 	}
-	
+
 	exit 0;
 }
 
@@ -232,31 +232,31 @@ print "done.\n";
 
 ### Softwares/Packages ###
 # oncoIMPACT
-if($config{'general.oncoIMPACT'}){	
+if($config{'general.oncoIMPACT'}){
 	print "Running oncoIMPACT. Please wait...";
 
-	# Initialise folder		
+	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/ONCOIMPACT/$runID";
 	unless (-e $analysisDir){
 		system("mkdir -p $analysisDir");
 		system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCOIMPACT/LATEST");
 	}
-	
+
 	# Generate config file
-	generateConfig("oncoIMPACT");	
-	
+	generateConfig("oncoIMPACT");
+
 	# Run oncoIMPACT
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_oncoIMPACT -e $logsDir/oncoIMPACT.error.log -o $logsDir/oncoIMPACT.run.log $config{'general.scriptsDir'}/ONCOIMPACT/oncoIMPACT.pl $analysisDir/oncoIMPACT_$runID.cfg";
 	$command = $command . " 1" if ($flag_debug);
 	submit($command);
-	
+
 	# Parse oncoIMPACT output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $logsDir/oncoIMPACT_parseOutput.error.log -o $logsDir/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $analysisDir --out $resultsDir/oncoIMPACT.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -264,29 +264,29 @@ if($config{'general.oncoIMPACT'}){
 # DriverNet
 if($config{'general.DriverNet'}){
 	print "Running DriverNet. Please wait...";
-	
+
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/DRIVERNET/$runID";
 	unless (-e $analysisDir){
 		system("mkdir -p $analysisDir");
 		system("ln -sfn $analysisDir $config{'general.analysisDir'}/DRIVERNET/LATEST");
 	}
-	
+
 	# Generate config file
 	generateConfig("DriverNet");
-	
+
 	# Run DriverNet
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_DriverNet -e $logsDir/DriverNet.error.log -o $logsDir/DriverNet.run.log $config{'general.scriptsDir'}/DRIVERNET/run_driver_net.pl --config $analysisDir/DriverNet_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	# Parse DriverNet output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DriverNet_parseOutput -e $logsDir/DriverNet_parseOutput.error.log -o $logsDir/DriverNet_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/DRIVERNET/parse_to_standard_output.pl --in $analysisDir/res_driver_net.dat --out $resultsDir/DriverNet.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -294,29 +294,29 @@ if($config{'general.DriverNet'}){
 # MutSigCV
 if($config{'general.MutSigCV'}){
 	print "Running MutSigCV. Please wait...";
-	
+
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/MUTSIGCV/$runID";
 	unless (-e $analysisDir){
 		system("mkdir -p $analysisDir");
 		system("ln -sfn $analysisDir $config{'general.analysisDir'}/MUTSIGCV/LATEST");
 	}
-	
+
 	# Generate config file
 	generateConfig("MutSigCV");
-	
+
 	# Run MutSigCV
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=23:0:0,h=n070 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV -e $logsDir/MutSigCV.error.log -o $logsDir/MutSigCV.run.log $config{'general.scriptsDir'}/MUTSIGCV/run_MutSigCV.pl --config $analysisDir/MutSigCV_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	# Parse MutSigCV output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_parseOutput -e $logsDir/MutSigCV_parseOutput.error.log -o $logsDir/MutSigCV_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/MUTSIGCV/parse_to_standard_output.pl --in $analysisDir/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -324,29 +324,29 @@ if($config{'general.MutSigCV'}){
 # OncodriveFM
 if($config{'general.OncodriveFM'}){
 	print "Running OncodriveFM. Please wait...";
-	
+
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/ONCODRIVEFM/$runID";
 	unless (-e $analysisDir){
 		system("mkdir -p $analysisDir");
 		system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCODRIVEFM/LATEST");
 	}
-	
+
 	# Generate config file
 	generateConfig("OncodriveFM");
-	
+
 	# Run OncodriveFM
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_OncodriveFM -e $logsDir/OncodriveFM.error.log -o $logsDir/OncodriveFM.run.log $config{'general.scriptsDir'}/ONCODRIVEFM/run_OncodriveFM.pl --config $analysisDir/OncodriveFM_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	# Parse OncodriveFM output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveFM_parseOutput -e $logsDir/OncodriveFM_parseOutput.error.log -o $logsDir/OncodriveFM_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCODRIVEFM/parse_to_standard_output.pl --in $analysisDir/OncodriveFM-genes.tsv --out $resultsDir/OncodriveFM.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -354,20 +354,20 @@ if($config{'general.OncodriveFM'}){
 # LJB
 if($config{'general.LJB'}){
 	print "Running LJB. Please wait...";
-	
+
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/LJB/$runID";
 	unless (-e $analysisDir){
 		system("mkdir -p $analysisDir");
 		system("ln -sfn $analysisDir $config{'general.analysisDir'}/LJB/LATEST");
-	}	
-	
+	}
+
 	my $numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
 	chomp($numSamples);
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_LJB_parseOutput -e $logsDir/LJB_parseOutput.error.log -o $logsDir/LJB_parseOutput.run.log $config{'general.scriptsDir'}/LJB/parse_to_standard_output.pl --in $config{'LJB.annotation'} --samples $numSamples --outDir $resultsDir";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -375,29 +375,29 @@ if($config{'general.LJB'}){
 # OncodriveCLUST
 if($config{'general.OncodriveCLUST'}){
 	print "Running OncodriveCLUST. Please wait...";
-	
+
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/ONCODRIVECLUST/$runID";
 	unless (-e $analysisDir){
 		system("mkdir -p $analysisDir");
 		system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCODRIVECLUST/LATEST");
 	}
-	
+
 	# Generate config file
 	generateConfig("OncodriveCLUST");
-	
+
 	# Run OncodriveCLUST
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_OncodriveCLUST -e $logsDir/OncodriveCLUST.error.log -o $logsDir/OncodriveCLUST.run.log $config{'general.scriptsDir'}/ONCODRIVECLUST/run_OncodriveCLUST.pl --config $analysisDir/OncodriveCLUST_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	# Parse OncodriveCLUST output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCLUST_parseOutput -e $logsDir/OncodriveCLUST_parseOutput.error.log -o $logsDir/OncodriveCLUST_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCODRIVECLUST/parse_to_standard_output.pl --in $analysisDir/oncodriveclust-results.tsv --out $resultsDir/OncodriveCLUST.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -405,27 +405,27 @@ if($config{'general.OncodriveCLUST'}){
 # DawnRank
 if($config{'general.DawnRank'}){
 	print "Running DawnRank. Please wait...";
-	
+
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/DAWNRANK/$runID";
 	system("mkdir -p $analysisDir") unless (-e $analysisDir);
 	system("ln -sfn $analysisDir $config{'general.analysisDir'}/DAWNRANK/LATEST");
-	
+
 	# Generate config file
 	generateConfig("DawnRank");
-	
+
 	# Run DawnRank
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_DawnRank -e $logsDir/DawnRank.error.log -o $logsDir/DawnRank.run.log $config{'general.scriptsDir'}/DAWNRANK/run_DawnRank.pl --config $analysisDir/DawnRank_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	# Parse DawnRank output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank_parseOutput -e $logsDir/DawnRank_parseOutput.error.log -o $logsDir/DawnRank_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/DAWNRANK/parse_to_standard_output.pl --in $analysisDir/driver_list.dat --out $resultsDir/DawnRank.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -433,27 +433,27 @@ if($config{'general.DawnRank'}){
 # NetBox
 if($config{'general.NetBox'}){
 	print "Running NetBox. Please wait...";
-	
+
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/NETBOX/$runID";
 	system("mkdir -p $analysisDir") unless (-e $analysisDir);
 	system("ln -sfn $analysisDir $config{'general.analysisDir'}/NETBOX/LATEST");
-	
+
 	# Generate config file
 	generateConfig("NetBox");
-	
+
 	# Run NetBox
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_NetBox -e $logsDir/NetBox.error.log -o $logsDir/NetBox.run.log $config{'general.scriptsDir'}/NETBOX/run_NetBox.pl --config $analysisDir/NetBox_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	# Parse NetBox output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_NetBox_parseOutput -e $logsDir/NetBox_parseOutput.error.log -o $logsDir/NetBox_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/NETBOX/parse_to_standard_output.pl --in $analysisDir/modules.txt --mutation $config{'NetBox.mutationFrequency'} --outDir $resultsDir";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -461,20 +461,20 @@ if($config{'general.NetBox'}){
 # CHASM
 if($config{'general.CHASM'}){
 	print "Running CHASM. Please wait...";
-	
+
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/CHASM/$runID";
 	system("mkdir -p $analysisDir") unless (-e $analysisDir);
 	system("ln -sfn $analysisDir $config{'general.analysisDir'}/CHASM/LATEST");
-	
+
 	# Generate config file
 	generateConfig("CHASM");
-	
+
 	# Run CHASM
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_CHASM -e $logsDir/CHASM.error.log -o $logsDir/CHASM.run.log $config{'general.scriptsDir'}/CHASM/run_CHASM.pl --config $analysisDir/CHASM_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	# Parse CHASM output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
@@ -483,36 +483,36 @@ if($config{'general.CHASM'}){
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_CHASM_parseOutput -e $logsDir/CHASM_parseOutput.error.log -o $logsDir/CHASM_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $analysisDir --samples $numSamples --outDir $resultsDir";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
 
 # oncoIMPACT-v1
-if($config{'general.oncoIMPACT-v1'}){	
+if($config{'general.oncoIMPACT-v1'}){
 	print "Running oncoIMPACT-v1. Please wait...";
 
-	# Initialise folder		
+	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/ONCOIMPACT-V1/$runID";
 	unless (-e $analysisDir){
 		system("mkdir -p $analysisDir");
 		system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST");
 	}
-	
+
 	# Generate config file
-	generateConfig("oncoIMPACT-v1");	
-	
+	generateConfig("oncoIMPACT-v1");
+
 	# Run oncoIMPACT
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_oncoIMPACT-v1 -e $logsDir/oncoIMPACT-v1.error.log -o $logsDir/oncoIMPACT-v1.run.log -b y $config{'general.scriptsDir'}/ONCOIMPACT-V1/oncoIMPACT.exe --database $analysisDir/oncoIMPACT-v1_$runID.cfg";
 	submit($command);
-	
+
 	# Parse oncoIMPACT output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT-v1_parseOutput -e $logsDir/oncoIMPACT-v1_parseOutput.error.log -o $logsDir/oncoIMPACT-v1_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCOIMPACT-V1/parse_to_standard_output.pl --in $analysisDir --out $resultsDir/oncoIMPACT-v1.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -520,20 +520,20 @@ if($config{'general.oncoIMPACT-v1'}){
 # HotNet2
 if($config{'general.HotNet2'}){
 	print "Running HotNet2. Please wait...";
-	
+
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/HOTNET2/$runID";
 	system("mkdir -p $analysisDir") unless (-e $analysisDir);
 	system("ln -sfn $analysisDir $config{'general.analysisDir'}/HOTNET2/LATEST");
-	
+
 	# Generate config file
 	generateConfig("HotNet2");
-	
+
 	# Run HotNet2
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_HotNet2 -e $logsDir/HotNet2.error.log -o $logsDir/HotNet2.run.log $config{'general.scriptsDir'}/HOTNET2/run_HotNet2.pl --config $analysisDir/HotNet2_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -541,27 +541,27 @@ if($config{'general.HotNet2'}){
 # S2N
 if($config{'general.S2N'}){
 	print "Running S2N. Please wait...";
-	
+
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/S2N/$runID";
 	system("mkdir -p $analysisDir") unless (-e $analysisDir);
 	system("ln -sfn $analysisDir $config{'general.analysisDir'}/S2N/LATEST");
-	
+
 	# Generate config file
 	generateConfig("S2N");
-	
+
 	# Run S2N
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_S2N -e $logsDir/S2N.error.log -o $logsDir/S2N.run.log $config{'general.scriptsDir'}/S2N/run_S2N.pl --config $analysisDir/S2N_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	# Parse S2N output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_S2N_parseOutput -e $logsDir/S2N_parseOutput.error.log -o $logsDir/S2N_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/S2N/parse_to_standard_output.pl --in $analysisDir --out $resultsDir/S2N.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -569,27 +569,27 @@ if($config{'general.S2N'}){
 # OncodriveCIS
 if($config{'general.OncodriveCIS'}){
 	print "Running OncodriveCIS. Please wait...";
-	
+
 	# Initialise folder
 	$analysisDir = "$config{'general.analysisDir'}/ONCODRIVECIS/$runID";
 	system("mkdir -p $analysisDir") unless (-e $analysisDir);
 	system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCODRIVECIS/LATEST");
-	
+
 	# Generate config file
 	generateConfig("OncodriveCIS");
-	
+
 	# Run OncodriveCIS
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCIS -e $logsDir/OncodriveCIS.error.log -o $logsDir/OncodriveCIS.run.log $config{'general.scriptsDir'}/ONCODRIVECIS/run_OncodriveCIS.pl --config $analysisDir/OncodriveCIS_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	# Parse OncodriveCIS output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCIS_parseOutput -e $logsDir/OncodriveCIS_parseOutput.error.log -o $logsDir/OncodriveCIS_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCODRIVECIS/parse_to_standard_output.pl --in $analysisDir/OncoCNA.combined.txt --out $resultsDir/OncodriveCIS.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
-	
+
 	print "Job submitted.\n";
 }
 
@@ -608,7 +608,7 @@ sub submit {
 	print TRACE "[Command] $command\n";
 	unless($flag_simulate){
 		my $return = `$command`;
-		chomp($return);	
+		chomp($return);
 		push( @queue, $return );
 		print TRACE "\tJob $return submitted.\n";
 	}
@@ -618,7 +618,7 @@ sub generateConfig {
 	my $software = "@_";
 	open(OUT, "> $analysisDir/${software}_$runID.cfg");
 	print TRACE "[Config] Generating file: $analysisDir/${software}_$runID.cfg\n" if ($flag_debug);
-	
+
 	given($software){
 		when( 'oncoIMPACT'){
 			print OUT "outDir=$analysisDir\n";
@@ -650,7 +650,7 @@ sub generateConfig {
 			print OUT "chr=$config{'MutSigCV.chr'}\n";
 			print OUT "prefix=$config{'general.disease'}\n";
 			continue;
-		}		
+		}
 		when( 'OncodriveFM' ){
 			print OUT "outDir=$analysisDir\n";
 			print OUT "annotation=$config{'OncodriveFM.annotation'}\n";
@@ -665,13 +665,13 @@ sub generateConfig {
 			print OUT "outDir=$analysisDir\n";
 			print OUT "scriptsDir=$config{'general.scriptsDir'}/DAWNRANK\n";
 			continue;
-		}		
+		}
 		when( 'OncodriveCLUST' ){
 			print OUT "outDir=$analysisDir\n";
 			print OUT "annotation=$config{'OncodriveCLUST.annotation'}\n";
 			print OUT "transcript=$config{'OncodriveCLUST.transcript'}\n";
 			continue;
-		}		
+		}
 		when( 'NetBox' ){
 			print OUT "outDir=$analysisDir\n";
 			print OUT "gene=$config{'NetBox.gene'}\n";
@@ -679,7 +679,7 @@ sub generateConfig {
 			print OUT "maxMutation=$config{'NetBox.maxMutation'}\n";
 			print OUT "scriptsDir=$config{'general.scriptsDir'}/NETBOX\n";
 			continue;
-		}	
+		}
 		when( 'CHASM' ){
 			print OUT "outDir=$analysisDir\n";
 			print OUT "maf=$config{'CHASM.maf'}\n";
@@ -697,7 +697,7 @@ sub generateConfig {
 			print OUT "benchmarkGeneList=$config{'oncoIMPACT-v1.benchmarkGeneList'}\n";
 			print OUT "dataType=$config{'oncoIMPACT-v1.dataType'}\n";
 			continue;
-		}			
+		}
 		when( 'HotNet2' ){
 			print OUT "mem=$config{'cluster.mem'}\n";
 			print OUT "runtime=$config{'cluster.runtime'}\n";
@@ -717,7 +717,7 @@ sub generateConfig {
 			print OUT "deltaPerm=$config{'HotNet2.deltaPerm'}\n";
 			print OUT "sigPerm=$config{'HotNet2.sigPerm'}\n";
 			continue;
-		}	
+		}
 		when( 'S2N' ){
 			print OUT "outDir=$analysisDir\n";
 			print OUT "scriptsDir=$config{'general.scriptsDir'}/S2N\n";
@@ -725,7 +725,7 @@ sub generateConfig {
 			print OUT "exp=$config{'S2N.exp'}\n";
 			print OUT "cnv=$config{'S2N.cnv'}\n";
 			continue;
-		}	
+		}
 		when( 'OncodriveCIS' ){
 			print OUT "outDir=$analysisDir\n";
 			print OUT "scriptsDir=$config{'general.scriptsDir'}/ONCODRIVECIS\n";
@@ -735,7 +735,7 @@ sub generateConfig {
 			print OUT "cnv=$config{'S2N.cnv'}\n";
 			print OUT "normals=$config{'S2N.normals'}\n";
 			continue;
-		}				
+		}
 		default{
 			close(OUT);
 		}
