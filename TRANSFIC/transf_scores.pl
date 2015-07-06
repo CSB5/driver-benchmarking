@@ -31,9 +31,9 @@ my @muts = <MUTS>;
 
 if ($outfile) {
   open (STDOUT, ">$outfile");
-} 
+}
 
-my $dist_file = dirname($0) . "/../data/$partition.genes";
+my $dist_file = dirname($0) . "/data/$partition.genes";
 
 my (%original, %transformed);
 
