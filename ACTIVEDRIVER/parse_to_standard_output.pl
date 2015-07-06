@@ -3,22 +3,21 @@
 use warnings;
 use Getopt::Long;
 
-my ($file_in, $out_dir, $flag_debug, $flag_help);
+my ($in_dir, $out_dir, $flag_debug, $flag_help);
 
 my $help_message = "
-This script parses HotNet2's output to a standard output.
+This script parses ActiveDriver's output to a standard output.
 
 Usage:
 	parse_to_standard_output.pl [OPTIONS]
 
 Options:
-	--in = path to HotNet results file *
+	--inDir = path to ActiveDriver results directory *
 	--outDir = path to output directory *
 	--debug: prints trace to STDERR
 	--help : prints this message
 
 * indicates required parameters
-
 
 
 Version:
@@ -34,7 +33,7 @@ if ( @ARGV == 0 ) {
 }
 
 GetOptions(
-	"in=s"      	=> \$file_in,
+	"inDir=s"      	=> \$in_dir,
 	"outDir=s"      => \$out_dir,
 	"debug"         => \$flag_debug,
 	"help"          => \$flag_help
@@ -48,8 +47,8 @@ if ($flag_help) {
 
 if ($flag_debug) {
 	print STDERR "Input parameters:\n";
-	print STDERR "INPUT: $file_in\n";
+	print STDERR "INPUT: $in_dir\n";
 	print STDERR "OUTPUT: $out_dir\n";
 }
 
-system("cp $file_in $out_dir");
+system("cp $in_dir/*.result $out_dir");
