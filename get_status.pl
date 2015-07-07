@@ -15,9 +15,9 @@ Usage:
 
 Options:
 	--config = path to config file *
-	--help : prints this message 
-	
-* indicates required parameters	
+	--help : prints this message
+
+* indicates required parameters
 
 
 Version:
@@ -52,6 +52,14 @@ open( STATUS, "> $config{'general.analysisDir'}/LOGS/status.log" );
 my $date = localtime;
 print STATUS "Date: $date\n";
 
+# ActiveDriver
+print STATUS "ActiveDriver: ";
+if(-s "$config{'general.analysisDir'}/ACTIVEDRIVER/LATEST/ActiveDriver_phospho.result" && -s "$config{'general.analysisDir'}/ACTIVEDRIVER/LATEST/ActiveDriver_PTM.result"){
+	print STATUS "OK\n";
+} else{
+	print STATUS "Failed\n";
+}
+
 # CHASM
 print STATUS "CHASM: ";
 if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant_Additional_Details.Result.tsv"){
@@ -71,6 +79,14 @@ if(-s "$config{'general.analysisDir'}/DAWNRANK/LATEST/driver_list.dat"){
 # DriverNet
 print STATUS "DriverNet: ";
 if(-s "$config{'general.analysisDir'}/DRIVERNET/LATEST/res_driver_net.dat"){
+	print STATUS "OK\n";
+} else{
+	print STATUS "Failed\n";
+}
+
+# FATHMM
+print STATUS "FATHMM: ";
+if(-s "$config{'general.analysisDir'}/FATHMM/LATEST/fathmm.result"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";
@@ -151,6 +167,14 @@ if(-s "$config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST/driver_list.txt"){
 # S2N
 print STATUS "S2N: ";
 if(-s "$config{'general.analysisDir'}/S2N/LATEST/S2N.result"){
+	print STATUS "OK\n";
+} else{
+	print STATUS "Failed\n";
+}
+
+# transFIC
+print STATUS "transFIC: ";
+if(-s "$config{'general.analysisDir'}/TRANSFIC/LATEST/transFIC.result"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";

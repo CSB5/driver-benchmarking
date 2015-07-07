@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.7.1";
+my $version = "v3.8.0";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -68,11 +68,21 @@ if($flag_update){
 	my $resultsDir = "$config{'general.analysisDir'}/CONSOLIDATED_RESULTS/LATEST";
 	my $logsDir = "$config{'general.analysisDir'}/LOGS/$runID";
 	my $numSamples;
+	$numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
+	chomp($numSamples);
+
+	# ActiveDriver
+	print "ActiveDriver: ";
+	$command = "$config{'general.scriptsDir'}/ACTIVEDRIVER/parse_to_standard_output.pl --inDir $config{'general.analysisDir'}/ACTIVEDRIVER/LATEST --outDir $resultsDir";
+	if(-s "$config{'general.analysisDir'}/ACTIVEDRIVER/LATEST/ActiveDriver_phospho.result" && -s "$config{'general.analysisDir'}/ACTIVEDRIVER/LATEST/ActiveDriver_PTM.result"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
 
 	# CHASM
 	print "CHASM: ";
-	$numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
-	chomp($numSamples);
 	$command = "$config{'general.scriptsDir'}/CHASM/parse_to_standard_output.pl --inDir $config{'general.analysisDir'}/CHASM/LATEST --samples $numSamples --outDir $resultsDir";
 	if(-s "$config{'general.analysisDir'}/CHASM/LATEST/Variant_Additional_Details.Result.tsv"){
 		system($command);
@@ -101,6 +111,16 @@ if($flag_update){
 		print "Incomplete run!\n";
 	}
 
+	# FATHMM
+	print "FATHMM: ";
+	$command = "$config{'general.scriptsDir'}/FATHMM/parse_to_standard_output.pl --in $config{'general.analysisDir'}/FATHMM/LATEST/fathmm.result --samples $numSamples --outDir $resultsDir";
+	if(-s "$config{'general.analysisDir'}/FATHMM/LATEST/fathmm.result"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+
 	# HotNet2
 	print "HotNet2: ";
 	$command = "$config{'general.scriptsDir'}/HOTNET2/parse_to_standard_output.pl --in $config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result --outDir $resultsDir";
@@ -113,8 +133,6 @@ if($flag_update){
 
 	# LJB
 	print "LJB: ";
-	$numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
-	chomp($numSamples);
 	$command = "$config{'general.scriptsDir'}/LJB/parse_to_standard_output.pl --in $config{'LJB.annotation'} --samples $numSamples --outDir $resultsDir";
 	if(-s "$config{'LJB.annotation'}"){
 		system($command);
@@ -197,6 +215,16 @@ if($flag_update){
 	print "S2N: ";
 	$command = "$config{'general.scriptsDir'}/S2N/parse_to_standard_output.pl --in $config{'general.analysisDir'}/S2N/LATEST/S2N.result --outDir $resultsDir";
 	if(-s "$config{'general.analysisDir'}/S2N/LATEST/S2N.result"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+
+	# transFIC
+	print "transFIC: ";
+	$command = "$config{'general.scriptsDir'}/TRANSFIC/parse_to_standard_output.pl --in $config{'general.analysisDir'}/TRANSFIC/LATEST/transFIC.result --samples $numSamples --outDir $resultsDir";
+	if(-s "$config{'general.analysisDir'}/TRANSFIC/LATEST/transFIC.result"){
 		system($command);
 		print "Done\n";
 	} else{
@@ -594,6 +622,94 @@ if($config{'general.OncodriveCIS'}){
 }
 
 
+# ActiveDriver
+if($config{'general.ActiveDriver'}){
+	print "Running ActiveDriver. Please wait...";
+
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/ACTIVEDRIVER/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/ACTIVEDRIVER/LATEST");
+
+	# Generate config file
+	generateConfig("ActiveDriver");
+
+	# Run ActiveDriver
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_ActiveDriver -e $logsDir/ActiveDriver.error.log -o $logsDir/ActiveDriver.run.log $config{'general.scriptsDir'}/ACTIVEDRIVER/run_ActiveDriver.pl --config $analysisDir/ActiveDriver_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+
+	# Parse ActiveDriver output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_ActiveDriver_parseOutput -e $logsDir/ActiveDriver_parseOutput.error.log -o $logsDir/ActiveDriver_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ACTIVEDRIVER/parse_to_standard_output.pl --inDir $analysisDir --outDir $resultsDir";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+
+	print "Job submitted.\n";
+}
+
+
+# FATHMM
+if($config{'general.FATHMM'}){
+	print "Running FATHMM. Please wait...";
+
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/FATHMM/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/FATHMM/LATEST");
+
+	# Generate config file
+	generateConfig("FATHMM");
+
+	# Run FATHMM
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_FATHMM -e $logsDir/FATHMM.error.log -o $logsDir/FATHMM.run.log $config{'general.scriptsDir'}/FATHMM/run_FATHMM.pl --config $analysisDir/FATHMM_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+
+	# Parse FATHMM output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	my $numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
+	chomp($numSamples);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_FATHMM_parseOutput -e $logsDir/FATHMM_parseOutput.error.log -o $logsDir/FATHMM_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/FATHMM/parse_to_standard_output.pl --in $analysisDir/fathmm.result --samples $numSamples --outDir $resultsDir";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+
+	print "Job submitted.\n";
+}
+
+
+# transFIC
+if($config{'general.transFIC'}){
+	print "Running transFIC. Please wait...";
+
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/TRANSFIC/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/TRANSFIC/LATEST");
+
+	# Generate config file
+	generateConfig("TRANSFIC");
+
+	# Run transFIC
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_transFIC -e $logsDir/transFIC.error.log -o $logsDir/transFIC.run.log $config{'general.scriptsDir'}/TRANSFIC/run_transFIC.pl --config $analysisDir/transFIC_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+
+	# Parse transFIC output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	my $numSamples = `wc -l $config{'general.completeSamples'} | cut -f 1 -d \" \"`;
+	chomp($numSamples);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_transFIC_parseOutput -e $logsDir/transFIC_parseOutput.error.log -o $logsDir/transFIC_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/TRANSFIC/parse_to_standard_output.pl --in $analysisDir/transFIC.result --samples $numSamples --outDir $resultsDir";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+
+	print "Job submitted.\n";
+}
+
+
 
 
 
@@ -734,6 +850,24 @@ sub generateConfig {
 			print OUT "exp=$config{'S2N.exp'}\n";
 			print OUT "cnv=$config{'S2N.cnv'}\n";
 			print OUT "normals=$config{'S2N.normals'}\n";
+			continue;
+		}
+		when( 'ActiveDriver' ){
+			print OUT "outDir=$analysisDir\n";
+			print OUT "annotation=$config{'ActiveDriver.annotation'}\n";
+			print OUT "scriptsDir=$config{'general.scriptsDir'}/ACTIVEDRIVER\n";
+			continue;
+		}
+		when( 'FATHMM' ){
+			print OUT "outDir=$analysisDir\n";
+			print OUT "annotation=$config{'FATHMM.annotation'}\n";
+			print OUT "ref=$config{'FATHMM.ref'}\n";
+			continue;
+		}
+		when( 'transFIC' ){
+			print OUT "outDir=$analysisDir\n";
+			print OUT "annotation=$config{'transFIC.annotation'}\n";
+			print OUT "scriptsDir=$config{'general.scriptsDir'}/TRANSFIC\n";
 			continue;
 		}
 		default{
