@@ -120,7 +120,7 @@ $command = "$config{'default.scriptsDir'}/transf_scores.pl gosmf $file_in $file_
 print STDERR "$command\n" if($flag_debug);
 system($command);
 
-$command = "cut -f 1,7 $file_intermediate | sed 's/_/\\t/' > $file_final";
+$command = "cut -f 1,7,8 $file_intermediate | grep \"high_impact\" | sed 's/_/\\t/' | sort -k2,2 -k1,1 > $file_final";
 print STDERR "$command\n" if($flag_debug);
 system($command);
 print "done.\n";
