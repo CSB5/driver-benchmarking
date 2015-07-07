@@ -169,7 +169,7 @@ print "done.\n";
 
 # generate gene prediction score
 print "Generating gene prediction score. Please wait...";
-$command = "awk '{print \$2\":\"\$3\"\\t\"\$4\"\\t\"\$5}' $output_file | join -1 1 -2 5 --nocheck-order - $input_file | sed 's/ /\\t/g' | awk '{if(\$2 == \"CANCER\") print \$6\"\\t\"\$2\"\\t\"\$3\"\\t\"\$7}' > $result_file";
+$command = "awk '{print \$2\":\"\$3\"\\t\"\$4\"\\t\"\$5}' $output_file | join -1 1 -2 5 --nocheck-order - $input_file | sed 's/ /\\t/g' | awk '{if(\$2 == \"CANCER\") print \$6\"\\t\"\$2\"\\t\"\$3\"\\t\"\$7}' | sort -k1,1 -k4,4 > $result_file";
 print STDERR "$command\n" if($flag_debug);
 system($command);
 print "done.\n";
