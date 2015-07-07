@@ -690,7 +690,7 @@ if($config{'general.transFIC'}){
 	system("ln -sfn $analysisDir $config{'general.analysisDir'}/TRANSFIC/LATEST");
 
 	# Generate config file
-	generateConfig("TRANSFIC");
+	generateConfig("transFIC");
 
 	# Run transFIC
 	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_transFIC -e $logsDir/transFIC.error.log -o $logsDir/transFIC.run.log $config{'general.scriptsDir'}/TRANSFIC/run_transFIC.pl --config $analysisDir/transFIC_$runID.cfg";
