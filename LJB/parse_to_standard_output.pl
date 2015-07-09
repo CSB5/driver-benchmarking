@@ -57,19 +57,10 @@ if ($flag_debug) {
 
 my ($counter, @temp, $gene, $score, $type, $threshold, %reportedGenes, $currentGene, @currentScore, $currentSample, @samples, $sample, $bestScore);
 
-if (index($file_in, "hg19") != -1) {
-	# hg19
-	sift("7,13,58");
-	polyphen2("7,17,58");
-	mutationAssessor("7,23,24,58");
-	mutationTaster("7,21,22,58");
-} else{
-	# hg18
-	sift("7,11,56");
-	polyphen2("7,15,56");
-	mutationAssessor("7,21,22,56");
-	mutationTaster("7,19,20,56");
-}
+sift("7,13,58");
+polyphen2("7,17,58");
+mutationAssessor("7,23,24,58");
+mutationTaster("7,21,22,58");
 
 
 ######## sub routines ########

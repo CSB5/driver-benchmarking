@@ -213,7 +213,7 @@ if($flag_update){
 
 	# S2N
 	print "S2N: ";
-	$command = "$config{'general.scriptsDir'}/S2N/parse_to_standard_output.pl --in $config{'general.analysisDir'}/S2N/LATEST/S2N.result --outDir $resultsDir";
+	$command = "$config{'general.scriptsDir'}/S2N/parse_to_standard_output.pl --in $config{'general.analysisDir'}/S2N/LATEST/S2N.result --out $resultsDir/S2N.result";
 	if(-s "$config{'general.analysisDir'}/S2N/LATEST/S2N.result"){
 		system($command);
 		print "Done\n";
@@ -562,6 +562,13 @@ if($config{'general.HotNet2'}){
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 
+	# Parse HotNet2 output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_HotNet2_parseOutput -e $logsDir/HotNet2_parseOutput.error.log -o $logsDir/HotNet2_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/HOTNET2/parse_to_standard_output.pl --in $analysisDir --outDir $resultsDir";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+
 	print "Job submitted.\n";
 }
 
@@ -818,7 +825,7 @@ sub generateConfig {
 			print OUT "mem=$config{'cluster.mem'}\n";
 			print OUT "runtime=$config{'cluster.runtime'}\n";
 			print OUT "numThreads=$config{'cluster.numThreads'}\n";
-			print OUT "resultsDir=$resultsDir\n";
+			print OUT "resultsDir=$analysisDir\n";
 			print OUT "outDir=$analysisDir\n";
 			print OUT "scriptsDir=$config{'general.scriptsDir'}/HOTNET2\n";
 			print OUT "installationDir=$config{'HotNet2.installationDir'}\n";
@@ -827,9 +834,6 @@ sub generateConfig {
 			print OUT "irefMaf=$config{'HotNet2.irefMaf'}\n";
 			print OUT "irefIndex=$config{'HotNet2.irefIndex'}\n";
 			print OUT "irefNetworks=$config{'HotNet2.irefNetworks'}\n";
-			print OUT "hintMaf=$config{'HotNet2.hintMaf'}\n";
-			print OUT "hintIndex=$config{'HotNet2.hintIndex'}\n";
-			print OUT "hintNetworks=$config{'HotNet2.hintNetworks'}\n";
 			print OUT "deltaPerm=$config{'HotNet2.deltaPerm'}\n";
 			print OUT "sigPerm=$config{'HotNet2.sigPerm'}\n";
 			continue;
