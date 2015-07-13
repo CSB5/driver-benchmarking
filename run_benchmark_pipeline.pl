@@ -565,7 +565,7 @@ if($config{'general.HotNet2'}){
 	# Parse HotNet2 output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_HotNet2_parseOutput -e $logsDir/HotNet2_parseOutput.error.log -o $logsDir/HotNet2_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/HOTNET2/parse_to_standard_output.pl --in $analysisDir --outDir $resultsDir";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_HotNet2_parseOutput -e $logsDir/HotNet2_parseOutput.error.log -o $logsDir/HotNet2_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/HOTNET2/parse_to_standard_output.pl --in $analysisDir/HotNet2.result --outDir $resultsDir";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 
