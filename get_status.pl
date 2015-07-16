@@ -21,7 +21,7 @@ Options:
 
 
 Version:
-	1.2
+	1.3
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
@@ -95,6 +95,14 @@ if(-s "$config{'general.analysisDir'}/FATHMM/LATEST/fathmm.result"){
 # HotNet2
 print STATUS "HotNet2: ";
 if(-s "$config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result"){
+	print STATUS "OK\n";
+} else{
+	print STATUS "Failed\n";
+}
+
+# HotNet2A
+print STATUS "HotNet2A: ";
+if(-s "$config{'general.analysisDir'}/HOTNET2A/LATEST/HotNet2.result"){
 	print STATUS "OK\n";
 } else{
 	print STATUS "Failed\n";
