@@ -58,8 +58,7 @@ system($command) unless (-e $config{'default.outDir'});
 
 
 # Preprocess gene mutation file
-$geneMutationFile = "$config{'default.outDir'}/gene_mutation_frequency.dat";
-$command = "tail -n+2 $config{'default.freqFile'} | cut -f 1,2 > $geneMutationFile";
+$command = "/mnt/projects/bertrandd/oncoimpact/MUTATION_BENCHMARK/SOFTWARE_TESTBED/HotNet2/generate_snv_input.pl $config{'default.freqFile'} $config{'default.mutSig'} $config{'default.outDir'}";
 system($command);
 print STDERR "$command\n" if ($flag_debug);
 
@@ -74,7 +73,7 @@ print OUT "--runname iref\n";
 print OUT "--infmat_file $config{'default.irefMaf'}\n";
 print OUT "--infmat_index_file $config{'default.irefIndex'}\n";
 print OUT "--permuted_networks_path $config{'default.irefNetworks'}\n";
-print OUT "--heat_file $geneMutationFile\n";
+print OUT "--heat_file $config{'default.outDir'}/hotnet2_snv.dat\n";
 print OUT "--output_directory $irefRunFolder\n";
 print OUT "--delta_permutations $config{'default.deltaPerm'}\n";
 print OUT "--significance_permutations $config{'default.sigPerm'}\n";

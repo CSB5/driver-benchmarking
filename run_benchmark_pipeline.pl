@@ -7,11 +7,11 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.8.0";
+my $version = "v3.9.0";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
-my ( $configFile, $flag_debug, $flag_help, $flag_update, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir);
+my ( $configFile, $flag_debug, $flag_help, $flag_update, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir, $mutSigID);
 my $qsub = "qsub -terse -m ae -M \$USER_PRINCIPAL_NAME -cwd -V";
 
 my $help_message = "
@@ -125,6 +125,16 @@ if($flag_update){
 	print "HotNet2: ";
 	$command = "$config{'general.scriptsDir'}/HOTNET2/parse_to_standard_output.pl --in $config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result --outDir $resultsDir";
 	if(-s "$config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+
+	# HotNet2 alternative
+	print "HotNet2A: ";
+	$command = "$config{'general.scriptsDir'}/HOTNET2A/parse_to_standard_output.pl --in $config{'general.analysisDir'}/HOTNET2/LATEST/HotNet2.result --outDir $resultsDir";
+	if(-s "$config{'general.analysisDir'}/HOTNET2A/LATEST/HotNet2.result"){
 		system($command);
 		print "Done\n";
 	} else{
@@ -341,6 +351,7 @@ if($config{'general.MutSigCV'}){
 	# Parse MutSigCV output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
+	$mutSigID = $lastID; # ID to control HotNet2A run
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_MutSigCV_parseOutput -e $logsDir/MutSigCV_parseOutput.error.log -o $logsDir/MutSigCV_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/MUTSIGCV/parse_to_standard_output.pl --in $analysisDir/$config{'general.disease'}.sig_genes.txt --out $resultsDir/MutSigCV.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
@@ -717,6 +728,34 @@ if($config{'general.transFIC'}){
 }
 
 
+# HotNet2A
+if($config{'general.HotNet2A'}){
+	print "Running HotNet2A. Please wait...";
+
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/HOTNET2A/$runID";
+	system("mkdir -p $analysisDir") unless (-e $analysisDir);
+	system("ln -sfn $analysisDir $config{'general.analysisDir'}/HOTNET2A/LATEST");
+
+	# Generate config file
+	generateConfig("HotNet2A");
+
+	# Run HotNet2
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_HotNet2A -e $logsDir/HotNet2A.error.log -o $logsDir/HotNet2A.run.log -hold_jid $mutSigID $config{'general.scriptsDir'}/HOTNET2A/run_HotNet2A.pl --config $analysisDir/HotNet2A_$runID.cfg";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+
+	# Parse HotNet2 output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_HotNet2A_parseOutput -e $logsDir/HotNet2A_parseOutput.error.log -o $logsDir/HotNet2A_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/HOTNET2A/parse_to_standard_output.pl --in $analysisDir/HotNet2.result --outDir $resultsDir";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+
+	print "Job submitted.\n";
+}
+
+
 
 
 
@@ -872,6 +911,24 @@ sub generateConfig {
 			print OUT "outDir=$analysisDir\n";
 			print OUT "annotation=$config{'transFIC.annotation'}\n";
 			print OUT "scriptsDir=$config{'general.scriptsDir'}/TRANSFIC\n";
+			continue;
+		}
+		when( 'HotNet2A' ){
+			print OUT "mem=$config{'cluster.mem'}\n";
+			print OUT "runtime=$config{'cluster.runtime'}\n";
+			print OUT "numThreads=$config{'cluster.numThreads'}\n";
+			print OUT "resultsDir=$analysisDir\n";
+			print OUT "outDir=$analysisDir\n";
+			print OUT "scriptsDir=$config{'general.scriptsDir'}/HOTNET2\n";
+			print OUT "installationDir=$config{'HotNet2A.installationDir'}\n";
+			print OUT "sigThreshold=$config{'HotNet2A.sigThreshold'}\n";
+			print OUT "freqFile=$config{'HotNet2A.freqFile'}\n";
+			print OUT "mutSig=$config{'HotNet2A.mutSig'}\n";
+			print OUT "irefMaf=$config{'HotNet2A.irefMaf'}\n";
+			print OUT "irefIndex=$config{'HotNet2A.irefIndex'}\n";
+			print OUT "irefNetworks=$config{'HotNet2A.irefNetworks'}\n";
+			print OUT "deltaPerm=$config{'HotNet2A.deltaPerm'}\n";
+			print OUT "sigPerm=$config{'HotNet2A.sigPerm'}\n";
 			continue;
 		}
 		default{
