@@ -893,9 +893,9 @@ sub generateConfig {
 			print OUT "scriptsDir=$config{'general.scriptsDir'}/ONCODRIVECIS\n";
 			print OUT "disease=$config{'general.disease'}\n";
 			print OUT "completeSamples=$config{'general.completeSamples'}\n";
-			print OUT "exp=$config{'S2N.exp'}\n";
-			print OUT "cnv=$config{'S2N.cnv'}\n";
-			print OUT "normals=$config{'S2N.normals'}\n";
+			print OUT "exp=$config{'OncodriveCIS.exp'}\n";
+			print OUT "cnv=$config{'OncodriveCIS.cnv'}\n";
+			print OUT "normals=$config{'OncodriveCIS.normals'}\n";
 			continue;
 		}
 		when( 'ActiveDriver' ){
