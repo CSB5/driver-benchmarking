@@ -88,6 +88,6 @@ print STDERR "$command\n" if ($flag_debug);
 system($command);
 
 ## chooseDelta
-$command = "$config{'default.scriptsDir'}/choseDelta-v2.py $irefRunFolder $geneMutationFile $config{'default.resultsDir'} $config{'default.sigThreshold'}";
+$command = "$config{'default.scriptsDir'}/choseDelta-v2.py $irefRunFolder $config{'default.outDir'}/hotnet2_snv.dat $config{'default.resultsDir'} $config{'default.sigThreshold'}";
 print STDERR "$command\n" if ($flag_debug);
 system($command);

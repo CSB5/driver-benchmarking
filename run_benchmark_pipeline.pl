@@ -454,7 +454,7 @@ if($config{'general.DawnRank'}){
 	generateConfig("DawnRank");
 
 	# Run DawnRank
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_DawnRank -e $logsDir/DawnRank.error.log -o $logsDir/DawnRank.run.log $config{'general.scriptsDir'}/DAWNRANK/run_DawnRank.pl --config $analysisDir/DawnRank_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=700:0:0 -pe OpenMP 1 -N $config{'general.disease'}_DawnRank -e $logsDir/DawnRank.error.log -o $logsDir/DawnRank.run.log $config{'general.scriptsDir'}/DAWNRANK/run_DawnRank.pl --config $analysisDir/DawnRank_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 
@@ -741,7 +741,10 @@ if($config{'general.HotNet2A'}){
 	generateConfig("HotNet2A");
 
 	# Run HotNet2
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_HotNet2A -e $logsDir/HotNet2A.error.log -o $logsDir/HotNet2A.run.log -hold_jid $mutSigID $config{'general.scriptsDir'}/HOTNET2A/run_HotNet2A.pl --config $analysisDir/HotNet2A_$runID.cfg";
+	if($mutSigID eq ""){
+		$mutSigID = 9999;
+	}
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_HotNet2A -e $logsDir/HotNet2A.error.log -o $logsDir/HotNet2A.run.log -hold_jid $mutSigID $config{'general.scriptsDir'}/HOTNET2A/run_HotNet2.pl --config $analysisDir/HotNet2A_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 
