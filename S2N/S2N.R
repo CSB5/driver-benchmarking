@@ -9,11 +9,11 @@ argv <- commandArgs(TRUE)
 
 expr <- read.table(argv[1], header = TRUE)
 cna <- read.table(argv[2], header = TRUE)
-exprMatrix   <- as.matrix(expr, rownames.force=TRUE)  
-cnaMatrix   <- as.matrix(cna, rownames.force=TRUE)  
+exprMatrix   <- log2(as.matrix(expr, rownames.force=TRUE))
+cnaMatrix   <- as.matrix(cna, rownames.force=TRUE)
 results <- CNAmet(exprMatrix = exprMatrix, cghMatrix = cnaMatrix,
-                  methylMatrix = NULL, perms = 1000, 
+                  methylMatrix = NULL, perms = 1000,
                   na.limit = 0.1, gainData = TRUE, favorSynergetic = TRUE,
                   strictChecks = FALSE, strictLim = 0.05)
-                  
+
 write.table(results, file=paste(argv[3], "S2N.result", sep="/"), sep="\t", row.names=T, col.names=T, quote=FALSE)

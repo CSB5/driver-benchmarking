@@ -604,7 +604,7 @@ if($config{'general.S2N'}){
 	# Parse S2N output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
-	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_S2N_parseOutput -e $logsDir/S2N_parseOutput.error.log -o $logsDir/S2N_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/S2N/parse_to_standard_output.pl --in $analysisDir --out $resultsDir/S2N.result";
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_S2N_parseOutput -e $logsDir/S2N_parseOutput.error.log -o $logsDir/S2N_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/S2N/parse_to_standard_output.pl --in $analysisDir/S2N.result --out $resultsDir/S2N.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 

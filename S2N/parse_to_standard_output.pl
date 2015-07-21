@@ -15,9 +15,9 @@ Options:
 	--in = path to S2N results file *
 	--out = path to output file *
 	--debug: prints trace to STDERR
-	--help : prints this message 
-	
-* indicates required parameters	
+	--help : prints this message
+
+* indicates required parameters
 
 
 Version:
@@ -48,27 +48,28 @@ if ($flag_help) {
 if ($flag_debug) {
 	print STDERR "Input parameters:\n";
 	print STDERR "INPUT: $file_in\n";
-	print STDERR "OUTPUT: $file_out\n";	
+	print STDERR "OUTPUT: $file_out\n";
 }
 
 
-my ($counter, @temp, $gene, $qval);
-my $qval_threshold = 0.05;
+my ($counter, @temp, $gene, $pval, $score);
+my $pval_threshold = 0.05;
 $counter = 1;
-open(IN, "sort -k2,2g $file_in |");
+open(IN, "sort -k4,4gr $file_in |");
 open(OUT, "> $file_out");
 <IN>;	# skip header
 <IN>;	# skip header
 <IN>;	# skip header
 <IN>;	# skip header
 <IN>;	# skip header
-print OUT "Gene_name\tSample\tRank\tqValue\tInfo\n";	# print header
+print OUT "Gene_name\tSample\tRank\tpValue\tScore\n";	# print header
 while(<IN>){
 	chomp(@temp = split(/\t/, $_));
 	$gene = $temp[0];
-	$qval = $temp[2];
-	last if($qval > $qval_threshold);
-	print OUT $gene . "\t" . "ALL" . "\t" . $counter . "\t" . $qval . "\t" . "-" . "\n";
+	$pval = $temp[4];
+	$score = $temp[3];
+	next if($pval > $pval_threshold);
+	print OUT $gene . "\t" . "ALL" . "\t" . $counter . "\t" . $pval . "\t" . $score . "\n";
 	$counter++;
 }
 close(OUT);
