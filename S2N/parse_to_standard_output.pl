@@ -55,20 +55,15 @@ if ($flag_debug) {
 my ($counter, @temp, $gene, $pval, $score);
 my $pval_threshold = 0.05;
 $counter = 1;
-open(IN, "sort -k4,4gr $file_in |");
+open(IN, "tail -n+2 $file_in | cut -f 1,4,5 | grep -vw \"NA\" | sort -k3,3g -k2,2gr |");
 open(OUT, "> $file_out");
-<IN>;	# skip header
-<IN>;	# skip header
-<IN>;	# skip header
-<IN>;	# skip header
-<IN>;	# skip header
 print OUT "Gene_name\tSample\tRank\tpValue\tScore\n";	# print header
 while(<IN>){
 	chomp(@temp = split(/\t/, $_));
 	$gene = $temp[0];
-	$pval = $temp[4];
-	$score = $temp[3];
-	next if($pval > $pval_threshold);
+	$score = $temp[1];
+	$pval = $temp[2];
+	last if($pval > $pval_threshold);
 	print OUT $gene . "\t" . "ALL" . "\t" . $counter . "\t" . $pval . "\t" . $score . "\n";
 	$counter++;
 }
