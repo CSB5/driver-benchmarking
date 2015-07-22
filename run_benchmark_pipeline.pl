@@ -12,7 +12,7 @@ my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
 my ( $configFile, $flag_debug, $flag_help, $flag_update, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir, $mutSigID);
-my $qsub = "qsub -terse -m ae -M \$USER_PRINCIPAL_NAME -cwd -V";
+my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -V";
 
 my $help_message = "
 This script runs various softwares for benchmarking.
