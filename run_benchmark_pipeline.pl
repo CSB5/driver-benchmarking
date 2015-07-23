@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.9.0";
+my $version = "v3.9.1";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
