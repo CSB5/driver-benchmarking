@@ -23,7 +23,7 @@ Options:
 
 
 Version:
-	1.2
+	1.3
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
@@ -87,7 +87,7 @@ sub sift {
 			push(@samples, $currentSample);
 
 			# Print results and re-initialize variables
-			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
+			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\t" . join(";", @currentScore) . "\n";
 			$currentGene = "";
 			@currentScore = ();
 			$currentSample = "";
@@ -108,7 +108,7 @@ sub sift {
 	# Print last entry
 	push(@currentScore, (1 - $bestScore));
 	push(@samples, $currentSample);
-	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
+	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\t" . join(";", @currentScore) . "\n";
 	close(OUT);
 	close(IN);
 
@@ -116,13 +116,14 @@ sub sift {
 	$file_out = "$outDir/SIFT.result";
 	open(IN, "sort -k2,2gr $outDir/SIFT.temp |");
 	open(OUT, ">$file_out");
-	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
+	print OUT "Gene_name\tSample\tRank\tScore\tInfo\tSample-specific_score\n";	# print header
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
 		$gene = $temp[0];
 		$score = $temp[1];
 		$sample = $temp[2];
-		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
+		$sample-specific_score = $temp[3];
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample-specific_score . "\n";
 		$counter++;
 	}
 	close(OUT);
@@ -155,7 +156,7 @@ sub polyphen2 {
 			push(@samples, $currentSample);
 
 			# Print results and re-initialize variables
-			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
+			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\t" . join(";", @currentScore) . "\n";
 			$currentGene = "";
 			@currentScore = ();
 			$currentSample = "";
@@ -176,7 +177,7 @@ sub polyphen2 {
 	# Print last entry
 	push(@currentScore, $bestScore);
 	push(@samples, $currentSample);
-	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
+	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\t" . join(";", @currentScore) . "\n";
 	close(OUT);
 	close(IN);
 
@@ -184,13 +185,14 @@ sub polyphen2 {
 	$file_out = "$outDir/PolyPhen2.result";
 	open(IN, "sort -k2,2gr $outDir/PolyPhen2.temp |");
 	open(OUT, ">$file_out");
-	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
+	print OUT "Gene_name\tSample\tRank\tScore\tInfo\tSample-specific_score\n";	# print header
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
 		$gene = $temp[0];
 		$score = $temp[1];
 		$sample = $temp[2];
-		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
+		$sample-specific_score = $temp[3];
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample-specific_score . "\n";
 		$counter++;
 	}
 	close(OUT);
@@ -225,7 +227,7 @@ sub mutationAssessor {
 			push(@samples, $currentSample);
 
 			# Print results and re-initialize variables
-			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
+			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\t" . join(";", @currentScore) . "\n";
 			$currentGene = "";
 			@currentScore = ();
 			$currentSample = "";
@@ -246,7 +248,7 @@ sub mutationAssessor {
 	# Print last entry
 	push(@currentScore, $bestScore);
 	push(@samples, $currentSample);
-	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
+	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\t" . join(";", @currentScore) . "\n";
 	close(OUT);
 	close(IN);
 
@@ -254,15 +256,16 @@ sub mutationAssessor {
 	$file_out = "$outDir/MutationAssessor.result";
 	open(IN, "sort -k2,2gr $outDir/MutationAssessor.temp | ");
 	open(OUT, ">$file_out");
-	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
+	print OUT "Gene_name\tSample\tRank\tScore\tInfo\tSample-specific_score\n";	# print header
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
 		$gene = $temp[0];
 		$score = $temp[1];
 		$type = $temp[2];
 		$sample = $temp[3];
+		$sample-specific_score = $temp[4];
 		next if ($score eq ".");
-		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample-specific_score . "\n";
 		$reportedGenes{$gene} = "";
 		$counter++;
 	}
@@ -297,7 +300,7 @@ sub mutationTaster {
 			push(@samples, $currentSample);
 
 			# Print results and re-initialize variables
-			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
+			print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\t" . join(";", @currentScore) . "\n";
 			$currentGene = "";
 			@currentScore = ();
 			$currentSample = "";
@@ -318,7 +321,7 @@ sub mutationTaster {
 	# Print last entry
 	push(@currentScore, $bestScore);
 	push(@samples, $currentSample);
-	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\n";
+	print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t". $type .  "\t" . join(";", @samples) . "\t" . join(";", @currentScore) . "\n";
 	close(OUT);
 	close(IN);
 
@@ -326,14 +329,15 @@ sub mutationTaster {
 	$file_out = "$outDir/MutationTaster.result";
 	open(IN, "sort -k2,2gr $outDir/MutationTaster.temp |");
 	open(OUT, ">$file_out");
-	print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
+	print OUT "Gene_name\tSample\tRank\tScore\tInfo\tSample-specific_score\n";	# print header
 	while(<IN>){
 		chomp(@temp = split(/\t/, $_));
 		$gene = $temp[0];
 		$score = $temp[1];
 		$type = $temp[2];
 		$sample = $temp[3];
-		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
+		$sample-specific_score = $temp[4];
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample-specific_score . "\n";
 		$reportedGenes{$gene} = "";
 		$counter++;
 	}

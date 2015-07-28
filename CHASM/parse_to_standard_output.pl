@@ -17,13 +17,13 @@ Options:
 	--samples = number of samples *
 	--outDir = path to output folder *
 	--debug: prints trace to STDERR
-	--help : prints this message 
-	
-* indicates required parameters	
+	--help : prints this message
+
+* indicates required parameters
 
 
 Version:
-	1.1
+	1.2
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
@@ -52,7 +52,7 @@ if ($flag_debug) {
 	print STDERR "Input parameters:\n";
 	print STDERR "INPUT DIR: $inDir\n";
 	print STDERR "Number of samples: $numSamples\n";
-	print STDERR "OUTPUT DIR: $outDir\n";	
+	print STDERR "OUTPUT DIR: $outDir\n";
 }
 
 my (%samples, %fdrs, %bestScore, %avgScore , %scores, @temp, $geneID, $sampleID, $geneScore, $fdr);
@@ -67,7 +67,7 @@ while(<FILE>){
 	$geneID = $temp[8];
 	$sampleID = $temp[7];
 	$geneScore = $temp[15];
-	$fdr = $temp[17];	
+	$fdr = $temp[17];
 	next if( $fdr eq "" || $fdr > $threshold );
 	unless(exists $samples{$geneID}){
 		my @list = ();
@@ -76,12 +76,12 @@ while(<FILE>){
 		$scores{$geneID} = \@score;
 		$fdrs{$geneID} = $fdr;
 		$bestScore{$geneID} = $geneScore;
-	} 
+	}
 	push(@{$samples{$geneID}}, $sampleID);
 	push(@{$scores{$geneID}}, $geneScore);
 	if($geneScore > $bestScore{$geneID}){
-		$bestScore{$geneID} = $geneScore; 
-		$fdrs{$geneID} = $fdr;		
+		$bestScore{$geneID} = $geneScore;
+		$fdrs{$geneID} = $fdr;
 	}
 }
 close(FILE);
@@ -95,20 +95,20 @@ foreach $geneID (sort keys %scores) {
 # Generate report
 ## Generating report for best score
 open(OUT, ">$outDir/CHASM.result");
-print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
+print OUT "Gene_name\tSample\tRank\tScore\tInfo\tSample-specific_score\n";	# print header
 my $rank = 1;
 foreach $geneID (sort { $bestScore{$b} <=> $bestScore{$a} or $a cmp $b } keys %bestScore) {
-	print OUT $geneID. "\t" . join(";", @{$samples{$geneID}}) . "\t" . $rank . "\t" . $bestScore{$geneID} . "\t" . "fdr:" . $fdrs{$geneID} . "\n";
+	print OUT $geneID. "\t" . join(";", @{$samples{$geneID}}) . "\t" . $rank . "\t" . $bestScore{$geneID} . "\t" . "fdr:" . $fdrs{$geneID} . "\t" . join(";", @{$scores{$geneID}}) . "\n";
 	$rank++;
 }
 close(OUT);
 
 ## Generating report for avg score
 open(OUT, ">$outDir/CHASM_average.result");
-print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
+print OUT "Gene_name\tSample\tRank\tScore\tInfo\tSample-specific_score\n";	# print header
 $rank = 1;
 foreach $geneID (sort { $avgScore{$b} <=> $avgScore{$a} or $a cmp $b } keys %avgScore) {
-	print OUT $geneID. "\t" . join(";", @{$samples{$geneID}}) . "\t" . $rank . "\t" . $avgScore{$geneID} . "\t" . "-" . "\n";
+	print OUT $geneID. "\t" . join(";", @{$samples{$geneID}}) . "\t" . $rank . "\t" . $avgScore{$geneID} . "\t" . "-" . "\t" . join(";", @{$scores{$geneID}}) . "\n";
 	$rank++;
 }
 close(OUT);

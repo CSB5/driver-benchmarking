@@ -23,7 +23,7 @@ Options:
 
 
 Version:
-	1.0
+	1.1
 
 Author:
 	Burton Chia - chiakhb\@gis.a-star.edu.sg
@@ -37,7 +37,7 @@ if ( @ARGV == 0 ) {
 GetOptions(
 	"in=s"      	=> \$file_in,
 	"samples=i"		=> \$numSamples,
-	"outDir=s"      => \$out_dir,
+	"outDir=s"    => \$out_dir,
 	"debug"       => \$flag_debug,
 	"help"        => \$flag_help
 ) or die("Error in command line arguments.\n");
@@ -73,7 +73,7 @@ while(<IN>){
     push(@samples, $currentSample);
 
     # Print results and re-initialize variables
-    print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
+    print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\t" . join(";", @currentScore) . "\n";
     $currentGene = "";
     @currentScore = ();
     $currentSample = "";
@@ -94,7 +94,7 @@ while(<IN>){
 # Print last entry
 push(@currentScore, $bestScore);
 push(@samples, $currentSample);
-print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\n";
+print OUT $currentGene . "\t" . sum(@currentScore)/$numSamples . "\t" . join(";", @samples) . "\t" . join(";", @currentScore) . "\n";
 close(OUT);
 close(IN);
 
@@ -102,13 +102,14 @@ $counter = 1;
 $file_out = "$out_dir/fathmm.result";
 open(IN, "sort -k2,2g $out_dir/fathmm.temp |");
 open(OUT, ">$file_out");
-print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
+print OUT "Gene_name\tSample\tRank\tScore\tInfo\tSample-specific_score\n";	# print header
 while(<IN>){
   chomp(@temp = split(/\t/, $_));
   $gene = $temp[0];
   $score = $temp[1];
   $sample = $temp[2];
-  print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
+	$sample-specific_score = $temp[3];
+  print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample-specific_score . "\n";
   $counter++;
 }
 close(OUT);
