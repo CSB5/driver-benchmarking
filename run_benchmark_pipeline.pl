@@ -375,7 +375,7 @@ if($config{'general.OncodriveFM'}){
 	generateConfig("OncodriveFM");
 
 	# Run OncodriveFM
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_OncodriveFM -e $logsDir/OncodriveFM.error.log -o $logsDir/OncodriveFM.run.log $config{'general.scriptsDir'}/ONCODRIVEFM/run_OncodriveFM.pl --config $analysisDir/OncodriveFM_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_OncodriveFM -e $logsDir/OncodriveFM.error.log -o $logsDir/OncodriveFM.run.log $config{'general.scriptsDir'}/ONCODRIVEFM/run_OncodriveFM.pl --config $analysisDir/OncodriveFM_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 
@@ -820,7 +820,7 @@ sub generateConfig {
 			print OUT "outDir=$analysisDir\n";
 			print OUT "annotation=$config{'OncodriveFM.annotation'}\n";
 			print OUT "mappingFile=$config{'OncodriveFM.mappingFile'}\n";
-			print OUT "numThreads=$config{'cluster.numThreads'}\n";
+			print OUT "numThreads=1\n";
 			continue;
 		}
 		when( 'DawnRank' ){
