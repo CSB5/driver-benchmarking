@@ -15,9 +15,9 @@ Usage:
 Options:
 	--config = path to config file *
 	--debug: prints trace to STDERR
-	--help : prints this message 
-	
-* indicates required parameters	
+	--help : prints this message
+
+* indicates required parameters
 
 
 Version:
@@ -54,9 +54,9 @@ $nb_random_test_by_proc = 500 / $config{'default.numProc'};
 $driver_net_dir = "$config{'default.outDir'}";
 system("mkdir -p $driver_net_dir") unless (-d $driver_net_dir);
 
-	
+
 open (OUT_cmd, ">$driver_net_dir/cmd.txt");
-	
+
 #Construct the R file
 for($i = 0; $i < $config{'default.numProc'}; $i++){
     $file = "$driver_net_dir/rand_$i.R";
@@ -72,20 +72,20 @@ for($i = 0; $i < $config{'default.numProc'}; $i++){
     }
     #Use an outlier matrix computed from the data
     else{
-    print OUT "temp <- read.table(\"$config{'default.expData'}\", header=T, check.names=F)\n";
+    print OUT "temp <- read.table(\"$config{'default.expData'}\", header=T, check.names=F, na.strings=\"null\")\n";
 	print OUT "patExpMatrix <- log2(t(temp))\n";
 	print OUT "patOutMatrix <- getPatientOutlierMatrix (as.matrix(patExpMatrix), th=2)\n";
     }
 
     print OUT "randomDriversResult = computeRandomizedResult(patMutMatrix=my_patMut, patOutMatrix=patOutMatrix, influenceGraph=influenceGraph, geneNameList= sampleGeneNames, outputFolder=NULL, printToConsole=FALSE,numberOfRandomTests=$nb_random_test_by_proc, weight=FALSE, purturbGraph=FALSE, purturbData=TRUE)\n";
-    
+
     print OUT "save(randomDriversResult, file=\"$driver_net_dir/rand_$i.rda\")\n";
     close(OUT);
-	    
+
     print OUT_cmd "/mnt/software/bin/Rscript-3.1.0 $file &> $file.log\n";
 }
 close(OUT_cmd);
-	
+
 #run the analysis in parallel
 $cmd = "cat $driver_net_dir/cmd.txt | xargs -I cmd --max-procs=$config{'default.numProc'} bash -c cmd > /dev/null \n";
 system("$cmd");
@@ -117,10 +117,10 @@ if(index($config{'default.expData'}, ".rda") != -1){
 }
 #Use an outlier matrix computed from the data
 else{
-    print OUT "temp <- read.table(\"$config{'default.expData'}\", header=T, check.names=F)\n";
+    print OUT "temp <- read.table(\"$config{'default.expData'}\", header=T, check.names=F, na.strings=\"null\")\n";
 	print OUT "patExpMatrix <- log2(t(temp))\n";
     print OUT "patOutMatrix <- getPatientOutlierMatrix(as.matrix(patExpMatrix), th=2)\n";
-    
+
 }
 #
 #
@@ -130,4 +130,3 @@ print OUT "res = resultSummary(driversList, randomDriversResult_comb, my_patMut,
 print OUT "write.table(res[,1:4], file=\"$driver_net_dir/res_driver_net.dat\", sep=\"\t\", row.names=T, col.names=T, quote=FALSE)\n";
 close(OUT);
 system("/mnt/software/bin/Rscript-3.1.0 $file\n");
-    
