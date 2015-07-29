@@ -122,8 +122,8 @@ sub sift {
 		$gene = $temp[0];
 		$score = $temp[1];
 		$sample = $temp[2];
-		$sample-specific_score = $temp[3];
-		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample-specific_score . "\n";
+		$sample_specific_score = $temp[3];
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample_specific_score . "\n";
 		$counter++;
 	}
 	close(OUT);
@@ -191,8 +191,8 @@ sub polyphen2 {
 		$gene = $temp[0];
 		$score = $temp[1];
 		$sample = $temp[2];
-		$sample-specific_score = $temp[3];
-		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample-specific_score . "\n";
+		$sample_specific_score = $temp[3];
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample_specific_score . "\n";
 		$counter++;
 	}
 	close(OUT);
@@ -263,9 +263,9 @@ sub mutationAssessor {
 		$score = $temp[1];
 		$type = $temp[2];
 		$sample = $temp[3];
-		$sample-specific_score = $temp[4];
+		$sample_specific_score = $temp[4];
 		next if ($score eq ".");
-		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample-specific_score . "\n";
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample_specific_score . "\n";
 		$reportedGenes{$gene} = "";
 		$counter++;
 	}
@@ -336,8 +336,8 @@ sub mutationTaster {
 		$score = $temp[1];
 		$type = $temp[2];
 		$sample = $temp[3];
-		$sample-specific_score = $temp[4];
-		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample-specific_score . "\n";
+		$sample_specific_score = $temp[4];
+		print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample_specific_score . "\n";
 		$reportedGenes{$gene} = "";
 		$counter++;
 	}

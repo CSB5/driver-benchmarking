@@ -108,8 +108,8 @@ while(<IN>){
   $gene = $temp[0];
   $score = $temp[1];
   $sample = $temp[2];
-	$sample-specific_score = $temp[3];
-  print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample-specific_score . "\n";
+	$sample_specific_score = $temp[3];
+  print OUT $gene . "\t" . $sample . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . $sample_specific_score . "\n";
   $counter++;
 }
 close(OUT);
