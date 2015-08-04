@@ -426,7 +426,7 @@ if($config{'general.OncodriveCLUST'}){
 	generateConfig("OncodriveCLUST");
 
 	# Run OncodriveCLUST
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_OncodriveCLUST -e $logsDir/OncodriveCLUST.error.log -o $logsDir/OncodriveCLUST.run.log $config{'general.scriptsDir'}/ONCODRIVECLUST/run_OncodriveCLUST.pl --config $analysisDir/OncodriveCLUST_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_OncodriveCLUST -e $logsDir/OncodriveCLUST.error.log -o $logsDir/OncodriveCLUST.run.log $config{'general.scriptsDir'}/ONCODRIVECLUST/run_OncodriveCLUST.pl --config $analysisDir/OncodriveCLUST_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 
@@ -569,7 +569,7 @@ if($config{'general.HotNet2'}){
 	generateConfig("HotNet2");
 
 	# Run HotNet2
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_HotNet2 -e $logsDir/HotNet2.error.log -o $logsDir/HotNet2.run.log $config{'general.scriptsDir'}/HOTNET2/run_HotNet2.pl --config $analysisDir/HotNet2_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_HotNet2 -e $logsDir/HotNet2.error.log -o $logsDir/HotNet2.run.log $config{'general.scriptsDir'}/HOTNET2/run_HotNet2.pl --config $analysisDir/HotNet2_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 
@@ -744,7 +744,7 @@ if($config{'general.HotNet2A'}){
 	if($mutSigID eq ""){
 		$mutSigID = 9999;
 	}
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP 1 -N $config{'general.disease'}_HotNet2A -e $logsDir/HotNet2A.error.log -o $logsDir/HotNet2A.run.log -hold_jid $mutSigID $config{'general.scriptsDir'}/HOTNET2A/run_HotNet2.pl --config $analysisDir/HotNet2A_$runID.cfg";
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_HotNet2A -e $logsDir/HotNet2A.error.log -o $logsDir/HotNet2A.run.log -hold_jid $mutSigID $config{'general.scriptsDir'}/HOTNET2A/run_HotNet2.pl --config $analysisDir/HotNet2A_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 
