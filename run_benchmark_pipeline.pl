@@ -11,7 +11,7 @@ my $version = "v3.9.1";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
-my ( $configFile, $flag_debug, $flag_help, $flag_update, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir, $mutSigID);
+my ( $configFile, $flag_debug, $flag_help, $flag_update, $flag_simulate, %config, @queue, $command, $lastID, $software, $outDir, $mutSigID, $oncoIMPACT_ID);
 my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -V";
 
 my $help_message = "
@@ -211,6 +211,16 @@ if($flag_update){
 		print "Incomplete run!\n";
 	}
 
+	# OncoIMPACT
+	print "oncoIMPACT-discovery: ";
+	$command = "$config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCOIMPACT-DISCOVERY/LATEST/ --out $resultsDir/oncoIMPACT-discovery.result";
+	if(-s "$config{'general.analysisDir'}/ONCOIMPACT-DISCOVERY/LATEST/driver_list.txt"){
+		system($command);
+		print "Done\n";
+	} else{
+		print "Incomplete run!\n";
+	}
+
 	# OncoIMPACT-v1
 	print "OncoIMPACT-v1: ";
 	$command = "$config{'general.scriptsDir'}/ONCOIMPACT-V1/parse_to_standard_output.pl --in $config{'general.analysisDir'}/ONCOIMPACT-V1/LATEST/ --out $resultsDir/oncoIMPACT-v1.result";
@@ -291,6 +301,7 @@ if($config{'general.oncoIMPACT'}){
 	# Parse oncoIMPACT output to standard format
 	$lastID = $queue[-1];
 	chomp($lastID);
+	$oncoIMPACT_ID = $lastID;
 	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT_parseOutput -e $logsDir/oncoIMPACT_parseOutput.error.log -o $logsDir/oncoIMPACT_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $analysisDir --out $resultsDir/oncoIMPACT.result";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
@@ -569,7 +580,7 @@ if($config{'general.HotNet2'}){
 	generateConfig("HotNet2");
 
 	# Run HotNet2
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_HotNet2 -e $logsDir/HotNet2.error.log -o $logsDir/HotNet2.run.log $config{'general.scriptsDir'}/HOTNET2/run_HotNet2.pl --config $analysisDir/HotNet2_$runID.cfg";
+	$command = "$qsub -l mem_free=200G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_HotNet2 -e $logsDir/HotNet2.error.log -o $logsDir/HotNet2.run.log $config{'general.scriptsDir'}/HOTNET2/run_HotNet2.pl --config $analysisDir/HotNet2_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 
@@ -744,7 +755,7 @@ if($config{'general.HotNet2A'}){
 	if($mutSigID eq ""){
 		$mutSigID = 9999;
 	}
-	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_HotNet2A -e $logsDir/HotNet2A.error.log -o $logsDir/HotNet2A.run.log -hold_jid $mutSigID $config{'general.scriptsDir'}/HOTNET2A/run_HotNet2.pl --config $analysisDir/HotNet2A_$runID.cfg";
+	$command = "$qsub -l mem_free=200G,h_rt=$runtime -pe OpenMP $config{'cluster.numThreads'} -N $config{'general.disease'}_HotNet2A -e $logsDir/HotNet2A.error.log -o $logsDir/HotNet2A.run.log -hold_jid $mutSigID $config{'general.scriptsDir'}/HOTNET2A/run_HotNet2.pl --config $analysisDir/HotNet2A_$runID.cfg";
 	$command = $command . " --debug" if ($flag_debug);
 	submit($command);
 
@@ -758,6 +769,34 @@ if($config{'general.HotNet2A'}){
 	print "Job submitted.\n";
 }
 
+# oncoIMPACT-discovery
+if($config{'general.oncoIMPACT-discovery'}){
+	print "Running oncoIMPACT (discovery mode). Please wait...";
+
+	# Initialise folder
+	$analysisDir = "$config{'general.analysisDir'}/ONCOIMPACT-DISCOVERY/$runID";
+	unless (-e $analysisDir){
+		system("mkdir -p $analysisDir");
+		system("ln -sfn $analysisDir $config{'general.analysisDir'}/ONCOIMPACT-DISCOVERY/LATEST");
+	}
+
+	# Generate config file
+	generateConfig("oncoIMPACT-discovery");
+
+	# Run oncoIMPACT
+	$command = "$qsub -l mem_free=$config{'cluster.mem'}G,h_rt=$runtime -hold_jid $oncoIMPACT_ID -pe 1 $config{'cluster.numThreads'} -N $config{'general.disease'}_oncoIMPACT-discovery -e $logsDir/oncoIMPACT-discovery.error.log -o $logsDir/oncoIMPACT-discovery.run.log $config{'general.scriptsDir'}/ONCOIMPACT/oncoIMPACT.pl $analysisDir/oncoIMPACT-discovery_$runID.cfg";
+	$command = $command . " 1" if ($flag_debug);
+	submit($command);
+
+	# Parse oncoIMPACT output to standard format
+	$lastID = $queue[-1];
+	chomp($lastID);
+	$command = "$qsub -l mem_free=1G,h_rt=0:10:0 -pe OpenMP 1 -N $config{'general.disease'}_oncoIMPACT-discovery_parseOutput -e $logsDir/oncoIMPACT-discovery_parseOutput.error.log -o $logsDir/oncoIMPACT-discovery_parseOutput.run.log -hold_jid $lastID $config{'general.scriptsDir'}/ONCOIMPACT/parse_to_standard_output.pl --in $analysisDir --out $resultsDir/oncoIMPACT-discovery.result";
+	$command = $command . " --debug" if ($flag_debug);
+	submit($command);
+
+	print "Job submitted.\n";
+}
 
 
 
@@ -793,7 +832,7 @@ sub generateConfig {
 			print OUT "exp=$config{'oncoIMPACT.exp'}\n";
 			print OUT "snp=$config{'oncoIMPACT.snp'}\n";
 			print OUT "dataType=$config{'oncoIMPACT.dataType'}\n";
-			#print OUT "databaseExport=$config{'oncoIMPACT.databaseExport'}\n";
+			print OUT "databaseExport=$config{'oncoIMPACT.databaseExport'}\n";
 			continue;
 		}
 		when( 'DriverNet' ){
@@ -932,6 +971,17 @@ sub generateConfig {
 			print OUT "irefNetworks=$config{'HotNet2A.irefNetworks'}\n";
 			print OUT "deltaPerm=$config{'HotNet2A.deltaPerm'}\n";
 			print OUT "sigPerm=$config{'HotNet2A.sigPerm'}\n";
+			continue;
+		}
+		when( 'oncoIMPACT-discovery'){
+			print OUT "outDir=$analysisDir\n";
+			print OUT "scriptDir=$config{'general.scriptsDir'}/ONCOIMPACT\n";
+			print OUT "numThreads=1\n";
+			print OUT "cnv=$config{'oncoIMPACT-discovery.cnv'}\n";
+			print OUT "exp=$config{'oncoIMPACT-discovery.exp'}\n";
+			print OUT "snp=$config{'oncoIMPACT-discovery.snp'}\n";
+			print OUT "dataType=$config{'oncoIMPACT-discovery.dataType'}\n";
+			print OUT "database=$config{'oncoIMPACT-discovery.database'}\n";
 			continue;
 		}
 		default{
