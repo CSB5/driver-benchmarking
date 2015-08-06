@@ -53,7 +53,7 @@ if ($flag_debug) {
 }
 
 
-my ($counter, @temp, $gene, $score, %ht, @samples, $sampleID);
+my ($counter, @temp, $gene, $score, %ht, %sampleScores, @samples, $sampleID);
 
 # Read OncoIMPACT output directory to get list of samples
 opendir( DIR, "$dir/sample_driver_list" );
@@ -68,11 +68,15 @@ foreach my $sample (@samples){
 	while(<FILE>){		
 		chomp(@temp = split(/\t/, $_));
 		$gene = $temp[0];
+		$score = $temp[2];
 		unless(exists $ht{$gene}){
 			my @sampleList = ();
+			my @scores = ();
 			$ht{$gene} = \@sampleList;
+			$sampleScores{$gene} = \@scores;
 		}
-		push( @{$ht{$gene}}, $sampleID);
+		push( @{$ht{$gene}}, $sampleID );
+		push( @{$sampleScores{$gene}}, $score );
 	}
 	close(FILE);
 }
@@ -82,14 +86,14 @@ my $score_threshold = 0;
 $counter = 1;
 open(IN, "$dir/driver_list.txt");
 open(OUT, "> $file_out");
-print OUT "Gene_name\tSample\tRank\tScore\tInfo\n";	# print header
+print OUT "Gene_name\tSample\tRank\tScore\tInfo\tSample-specific_score\n";	# print header
 <IN>;	# skip header
 while(<IN>){
 	chomp(@temp = split(/\t/, $_));
 	$gene = $temp[0];
 	$score = $temp[7];
 	last if($score <= $score_threshold);
-	print OUT $gene . "\t" . join(";", @{$ht{$gene}}) . "\t" . $counter . "\t" . $score . "\t" . "-" . "\n";
+	print OUT $gene . "\t" . join(";", @{$ht{$gene}}) . "\t" . $counter . "\t" . $score . "\t" . "-" . "\t" . join( ";", @{$sampleScores{$gene}} ) . "\n";
 	$counter++;
 }
 close(OUT);
