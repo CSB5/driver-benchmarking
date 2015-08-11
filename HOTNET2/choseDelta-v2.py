@@ -109,7 +109,7 @@ if(deltas[selected_delta_index[0]] <= args.sig_threshold):
     f.write('Gene_name\tSample\tRank\tScore\tInfo\n')
     for i in range(0,len(genes)):
         cola, colc = data[i]
-        f.write(cola + '\t\t' + str(rank[i]) + '\t' + str(colc) + '\n')
+        f.write(cola + '\tALL\t' + str(rank[i]) + '\t' + str(colc) + '\n')
     f.close()
 else: # no deltas/networks greater than significance threshold
     f = open(os.path.join(args.output_dir,'HotNet2.result'), 'w')
