@@ -66,8 +66,8 @@ unless (-d $config{'default.outDir'}){
 print "Preparing files needed for analysis. Please wait...";
 my %effect_name = (
     "nonsynonymous SNV", "non-synonymous",
-    "stopgain", "stop",
-    "stoploss", "stop",
+    # "stopgain", "stop",
+    # "stoploss", "stop",
     );
 
 #Notice that not all gene have a protein ID
@@ -95,6 +95,9 @@ close(FILE);
 open(FILE, $annot_file);
 open(OUT, ">$input_file");
 my $prot_coord = 0;
+my ( $counter_pass, $counter_fail, $counter_snv, $counter_flag );
+$counter_fail = 0;
+$counter_snv = 0;
 while(<FILE>){
     chop $_;
     @line = split(/\t/, $_);
@@ -111,7 +114,7 @@ while(<FILE>){
 
     #fathmm do not take into account splicing event
     if($all_effect[0] eq "." || $all_effect[0] eq "unknown" || $splicing_effect[0] eq "splicing"){
-	next;
+		next;
     }
 
 
@@ -122,43 +125,58 @@ while(<FILE>){
     @all_annot = ($info_line) if(@all_annot == 0);
     #
 
+    $counter_flag = 1;
+    $counter_pass = 0;
     for(my $i = 0; $i < @all_annot; $i++){
-	$annot = $all_annot[$i];
-	@annot_info = split(/\:/, $annot);
-	$trans_name = $annot_info[1];
-	if(!defined $trans_name){
-	    print STDERR " *** Warning no transcript name available $all_effect[0]\n".$_;#<STDIN>;
-	}
-	#print STDERR $trans_name."\n";
-	if(exists $trans_to_prot{$trans_name}){
-	    #The effect representatin is quite weird
-	    $eff = $all_effect[0];#We sre actually only looking at the first effect repported that should be the most important one
-	    #$eff = $all_effect[$i] if(@all_effect != 1);
+    	$annot = $all_annot[$i];
+		@annot_info = split(/\:/, $annot);
+		$trans_name = $annot_info[1];
+		if(!defined $trans_name){
+		    print STDERR " *** Warning no transcript name available $all_effect[0]\n".$_;#<STDIN>;
+		}
+		#print STDERR $trans_name."\n";
+		if(exists $trans_to_prot{$trans_name}){
+		    #The effect representatin is quite weird
+		    $eff = $all_effect[0];#We sre actually only looking at the first effect repported that should be the most important one
+		    #$eff = $all_effect[$i] if(@all_effect != 1);
 
-	    $effect = $effect_name{$eff};
-	    if(! defined $effect){
-		next;
-	    }
+		    $effect = $effect_name{$eff};
+		    if(! defined $effect){
+				next;
+		    }
 
-	    $coord = $annot_info[4];
-	    #print STDERR "the coord: ".$coord."\n";
-	    if($coord =~ /p\.(.*)/){
-		$prot_coord = $1;
-		#print STDERR $_."\n".$prot_coord."\n";<STDIN>;
-	    }
-	    $gene_name = $trans_to_prot{$trans_name}->[1];
-	    $prot_name = $trans_to_prot{$trans_name}->[0];
+			$counter_pass++;
+		    $counter_snv++ if( $counter_flag );
+		    $counter_flag = 0;
 
-	    $res = $prot_name."\t".$prot_coord."\t".$gene_name."\t".$sample_name."\t".$prot_name.":".$prot_coord."\n";
+		    $coord = $annot_info[4];
+		    #print STDERR "the coord: ".$coord."\n";
+		    if($coord =~ /p\.(.*)/){
+				if( index( $1, ";" ) != -1){
+					$prot_coord = (split( /;/, $1 ))[0];
+				} else{
+					$prot_coord = $1;
+				}
+				#print STDERR $_."\n".$prot_coord."\n";<STDIN>;
+		    }
+		    $gene_name = $trans_to_prot{$trans_name}->[1];
+		    $prot_name = $trans_to_prot{$trans_name}->[0];
 
-	    print OUT $res;
+		    $res = $prot_name."\t".$prot_coord."\t".$gene_name."\t".$sample_name."\t".$prot_name.":".$prot_coord."\t".$line[0].":".$line[1]."\n";
 
-	}
+		    print OUT $res;
+
+		}
     }
+    $counter_fail++ if( $counter_pass == 0 && $counter_flag == 0);
 }
 close(FILE);
 close(OUT);
 print "done.\n";
+print "## Statistics of transcript to protein mapping ##\n";
+print "Number of SNV without any mapping: $counter_fail (" . ( $counter_fail / $counter_snv ) . ")\n";
+$counter_pass = $counter_snv - $counter_fail;
+print "Number of SNV with mapping: $counter_pass (" . ( $counter_pass / $counter_snv ) . ")\n";
 
 # Running FATHMM
 print "Running FATHMM. Please wait...";
