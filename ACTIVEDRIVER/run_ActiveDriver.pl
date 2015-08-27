@@ -55,14 +55,14 @@ system($command) unless (-d $config{'default.outDir'});
 
 # Run ActiveDriver against default database
 print "Running ActiveDriver against phospho sites. Please wait...";
-$command = "$config{'default.scriptsDir'}/ActiveDriver_phospho.R -a $config{'default.annotation'} -f $config{'default.outDir'}/ActiveDriver_phospho.result";
+$command = "$config{'default.scriptsDir'}/ActiveDriver_phospho.R -a $config{'default.annotation'} -f $config{'default.outDir'}/ActiveDriver_phospho.result -c $config{'default.disease'}";
 print STDERR "$command\n" if $flag_debug;
 system($command);
 print "done.\n";
 
 # Run ActiveDriver against PTM sites
 print "Running ActiveDriver against PTM sites. Please wait...";
-$command = "$config{'default.scriptsDir'}/ActiveDriver_PTM.R -a $config{'default.annotation'} -f $config{'default.outDir'}/ActiveDriver_PTM.result";
+$command = "$config{'default.scriptsDir'}/ActiveDriver_PTM.R -a $config{'default.annotation'} -f $config{'default.outDir'}/ActiveDriver_PTM.result -c $config{'default.disease'}";
 print STDERR "$command\n" if $flag_debug;
 system($command);
 print "done.\n";

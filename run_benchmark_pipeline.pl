@@ -941,6 +941,7 @@ sub generateConfig {
 			print OUT "outDir=$analysisDir\n";
 			print OUT "annotation=$config{'ActiveDriver.annotation'}\n";
 			print OUT "scriptsDir=$config{'general.scriptsDir'}/ACTIVEDRIVER\n";
+			print OUT "disease=$config{'general.disease'}\n";
 			continue;
 		}
 		when( 'FATHMM' ){

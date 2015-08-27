@@ -13,6 +13,8 @@ option_list = list(
               help="directory containing .results files"),
   make_option(c("-f", "--fout"), action="store", default=NA, type='character',
               help=".results output file path")
+  make_option(c("-c", "--cancer_type"), action="store", default=NA, type='character',
+              help="type of cancer")
 )
 opt = parse_args(OptionParser(option_list=option_list))
 
@@ -20,7 +22,7 @@ opt = parse_args(OptionParser(option_list=option_list))
 dname = "/mnt/projects/bertrandd/oncoimpact/MUTATION_BENCHMARK/SOFTWARE_TESTBED/ActiveDriver/ActiveDriverData/Reimand_NatSciRep2013/"
 
 # Map Gene name to Longest Isoform
-finlongestTranscript <-"/mnt/projects/bertrandd/oncoimpact/MUTATION_BENCHMARK/SOFTWARE_TESTBED/ActiveDriver/ActiveDriverData/Reimand_NatSciRep2013/gene_symbol_to_refseq.tab"
+finlongestTranscript <-"/mnt/projects/bertrandd/oncoimpact/MUTATION_BENCHMARK/SOFTWARE_TESTBED/ActiveDriver/gene_symbol_to_refseq_SD.tab"
 
 longestTranscript <- read.table(finlongestTranscript, stringsAsFactors = FALSE)
 colnames(longestTranscript)[1] <- 'Gene.refGene'
@@ -50,7 +52,7 @@ muts <- mdply(.data = 1:nrow(dAnnovar), .fun = function(x){
     temp <- gsub('.*p.([A-Z])([0-9]+)([A-Z])',"\\1\\2\\3",temp,perl=TRUE)
     temp.cha <- unlist(str_extract_all(temp, "[A-Z]"))
     position <- as.numeric(str_extract(temp, "[0-9]+"))
-    return(data.frame(gene = dAnnovar$Gene.refGene[x], cancer_type = 'GBM', sample_id = dAnnovar$sample_id[x], position, wt_residue = temp.cha[1], mut_residue = temp.cha[2]))
+    return(data.frame(gene = dAnnovar$Gene.refGene[x], cancer_type = opt$c, sample_id = dAnnovar$sample_id[x], position, wt_residue = temp.cha[1], mut_residue = temp.cha[2]))
   }
 })
 
@@ -66,5 +68,9 @@ psnv_info = ActiveDriver(seqs, disorder, muts, sites)
 dout <- psnv_info$all_gene_based_fdr
 dout <- dout[order(dout$fdr),]
 dout <-dout[(dout$fdr <= 0.01),] # threshold used in Reimand 2013, doi:10.1038/srep02651
-dout <- data.frame(Gene_name = dout$gene, Sample = rep('ALL',nrow(dout)), Rank = 1:nrow(dout), pvalue = dout$p , FDR = dout$fdr)
-write.table(dout, opt$f, sep='\t', quote=F, row.names=F)
+if(nrow(dout)>0){
+  dout <- data.frame(Gene_name = dout$gene, Sample = rep('ALL',nrow(dout)), Rank = 1:nrow(dout), pvalue = dout$p , FDR = dout$fdr)
+  write.table(dout, opt$f, sep='\t', quote=F, row.names=F)
+}else{
+  writeLines('Gene_name\tSample\tRank\tpvalue\tFDR\t\n', opt$f)
+}
