@@ -7,7 +7,7 @@ use Getopt::Long;
 use POSIX 'strftime';
 use 5.010;
 
-my $version = "v3.10.0";
+my $version = "v3.10.1";
 my $date = strftime '%Y%m%d', localtime;
 my $runID = "${date}_${version}";
 
@@ -946,7 +946,8 @@ sub generateConfig {
 		when( 'FATHMM' ){
 			print OUT "outDir=$analysisDir\n";
 			print OUT "annotation=$config{'FATHMM.annotation'}\n";
-			print OUT "ref=$config{'FATHMM.ref'}\n";
+			print OUT "refEnsembl=$config{'FATHMM.refEnsembl'}\n";
+			print OUT "refUniprot=$config{'FATHMM.refUniprot'}\n";
 			continue;
 		}
 		when( 'transFIC' ){
