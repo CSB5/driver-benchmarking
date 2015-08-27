@@ -12,7 +12,7 @@ option_list = list(
   make_option(c("-a", "--annovar_file"), action="store", default=NA, type='character',
               help="directory containing .results files"),
   make_option(c("-f", "--fout"), action="store", default=NA, type='character',
-              help=".results output file path")
+              help=".results output file path"),
   make_option(c("-c", "--cancer_type"), action="store", default=NA, type='character',
               help="type of cancer")
 )

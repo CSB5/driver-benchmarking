@@ -148,7 +148,7 @@ while(<FILE>){
     
     #For usc annotation
     @all_effect_ucsc = split(/\;/, $line[8]);
-    #@all_effect_ucsc = ($line[8]) if(@all_effect == 0);
+    # @all_effect_ucsc = ($line[8]) if(@all_effect == 0);
     $info_line = $line[9];#this line contain the gene coordinate data
     #
     @all_annot_ucsc = split(/\,/, $info_line);
@@ -189,7 +189,7 @@ while(<FILE>){
 	    if(exists $trans_to_prot{$trans_name}){
 		#The effect representatin is quite weird
 		$eff = $all_effect[0];#We sre actually only looking at the first effect repported that should be the most important one
-		#$eff = $all_effect[$i] if(@all_effect != 1);
+		# $eff = $all_effect[$i] if(@all_effect != 1);
 		
 		$effect = $effect_name{$eff};
 		if(! defined $effect){
@@ -240,10 +240,10 @@ print "done.\n";
 #exit 0;
 
 # generate gene prediction score
-#print "Generating gene prediction score. Please wait...";
-#$command = "awk '{print \$2\":\"\$3\"\\t\"\$4\"\\t\"\$5}' $output_file | join -1 1 -2 5 --nocheck-order - $input_file | sed 's/ /\\t/g' | awk '{if(\$2 == \"CANCER\") print \$6\"\\t\"\$2\"\\t\"\$3\"\\t\"\$7}' | sort -k1,1 -k4,4 > $result_file";
-#print STDERR "$command\n" if(1 || $flag_debug);
-#system($command);
+# print "Generating gene prediction score. Please wait...";
+# $command = "awk '{print \$2\":\"\$3\"\\t\"\$4\"\\t\"\$5}' $output_file | join -1 1 -2 5 --nocheck-order - $input_file | sed 's/ /\\t/g' | awk '{if(\$2 == \"CANCER\") print \$6\"\\t\"\$2\"\\t\"\$3\"\\t\"\$7}' | sort -k1,1 -k4,4 > $result_file";
+# print STDERR "$command\n" if(1 || $flag_debug);
+# system($command);
 
 #This was too messy and need to re-coded in perl
 
