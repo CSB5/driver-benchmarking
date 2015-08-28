@@ -56,7 +56,7 @@ if ($flag_debug) {
 
 $file_out = "$out_dir/fathmm.temp";
 open(OUT, ">$file_out");
-open(IN, $file_in);
+open(IN, "sort -k1,1 $file_in |");
 $currentGene = "";
 @currentScore = ();
 $currentSample = "";
