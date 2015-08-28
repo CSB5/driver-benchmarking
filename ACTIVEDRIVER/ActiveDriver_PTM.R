@@ -25,7 +25,7 @@ dname = "/mnt/projects/bertrandd/oncoimpact/MUTATION_BENCHMARK/SOFTWARE_TESTBED/
 # Map Gene name to Longest Isoform
 finlongestTranscript <-"/mnt/projects/bertrandd/oncoimpact/MUTATION_BENCHMARK/SOFTWARE_TESTBED/ActiveDriver/gene_symbol_to_refseq_SD.tab"
 
-longestTranscript <- read.table(finlongestTranscript, stringsAsFactors = FALSE)
+longestTranscript <- read.table(finlongestTranscript, stringsAsFactors = FALSE, header = TRUE)
 colnames(longestTranscript)[1] <- 'Gene.refGene'
 
 dAnnovar <- read.delim(opt$a, stringsAsFactors = FALSE, header = FALSE)
