@@ -65,7 +65,7 @@ delta_max = max([deltas[index] for index in selected_delta_index])
 if(len(selected_delta_index) > 1): 
     selected_delta_index = [i for i in selected_delta_index if deltas[i] == delta_max]
 
-if(deltas[selected_delta_index[0]] <= args.sig_threshold):
+if(pval[selected_delta_index[0]] <= args.sig_threshold):
     # find maximum network size which still contains significant networks
     significance_table = np.loadtxt(subdir[selected_delta_index[0]]+'/significance.txt', skiprows = 1)
     K = k[selected_delta_index[0]]-3
